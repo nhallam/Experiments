@@ -38,13 +38,23 @@ pnpm test
 
 Covers the balance algorithm (`src/lib/balances.ts`): net balances, simplification, circular debts, post-settlement zero-sum.
 
-## Deploy (Vercel)
+## Deploy (Vercel, phone-friendly)
 
-1. Push this branch to GitHub.
-2. Connect the repo in Vercel.
-3. Create a Neon Postgres instance; copy the pooled and direct URLs into Vercel env vars as `DATABASE_URL` and `DIRECT_URL`.
-4. Create a Vercel Blob store; copy `BLOB_READ_WRITE_TOKEN`.
-5. In Vercel build settings, the `build` script runs `prisma generate && next build`. Add `prisma migrate deploy` as a pre-build command if you want migrations to run automatically.
+The build script runs `prisma db push` automatically on every deploy, so the
+schema gets created on first build without you touching a terminal. Default
+categories are seeded lazily on the first `/api/categories` request.
+
+1. In Vercel, click **Add New → Project** and import `nhallam/vs-code`.
+   Select the `claude/housemate-expense-tracker-GWg6W` branch.
+2. In the project's **Storage** tab, click **Create Database → Neon
+   (Postgres)**. This injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED`
+   automatically.
+3. Still in **Storage**, click **Create Store → Blob**. This injects
+   `BLOB_READ_WRITE_TOKEN`.
+4. Click **Deploy**. On first build, `prisma db push` creates the tables in
+   Neon, Next.js builds, and you land on the onboarding screen.
+5. Open the deployed URL on your phone, enter the three housemates' names,
+   and you're done.
 
 ## Future
 

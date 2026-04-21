@@ -3,8 +3,10 @@ import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createCategorySchema } from "@/lib/validators";
 import { handleZod, jsonError } from "@/lib/api-helpers";
+import { ensureDefaultCategories } from "@/lib/seed";
 
 export async function GET() {
+  await ensureDefaultCategories();
   const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
   return NextResponse.json(categories);
 }
