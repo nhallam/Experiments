@@ -2,15 +2,27 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/BottomNav";
 import { AppBootstrap } from "@/components/AppBootstrap";
+import { InstallHint } from "@/components/InstallHint";
 
 export const metadata: Metadata = {
-  title: "Housemate Expenses",
+  title: "Splitty",
   description: "Shared expense tracker for the house",
+  applicationName: "Splitty",
+  appleWebApp: {
+    capable: true,
+    title: "Splitty",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: "#0ea5e9",
 };
 
@@ -22,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AppBootstrap>{children}</AppBootstrap>
         </div>
         <BottomNav />
+        <InstallHint />
       </body>
     </html>
   );
