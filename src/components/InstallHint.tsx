@@ -72,9 +72,8 @@ export function InstallHint() {
   return (
     <div className="fixed inset-x-3 bottom-24 z-40 mx-auto max-w-md rounded-xl border border-neutral-200 bg-white p-4 shadow-lg">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-lg font-bold text-white">
-          S
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/icon.svg" alt="" className="h-10 w-10 shrink-0 rounded-lg" />
         <div className="flex-1 text-sm">
           <p className="font-medium">Install Splitty</p>
           {installEvent ? (
