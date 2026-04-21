@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  createdAt    DateTime       @default(now())
+  paidExpenses Expense[]      @relation("payer")
+  shares       ExpenseShare[]
+  paymentsFrom Settlement[]   @relation("from")
+  paymentsTo   Settlement[]   @relation("to")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  icon     String?
+  expenses Expense[]
+}
+
+model Expense {
+  id          String         @id @default(cuid())
+  amount      Int
+  currency    String         @default("USD")
+  payerId     String
+  payer       User           @relation("payer", fields: [payerId], references: [id])
+  categoryId  String?
+  category    Category?      @relation(fields: [categoryId], references: [id])
+  note        String?
+  receiptUrl  String?
+  date        DateTime
+  createdAt   DateTime       @default(now())
+  createdById String?
+  shares      ExpenseShare[]
+
+  @@index([date])
+  @@index([payerId])
+  @@index([categoryId])
+}
+
+model ExpenseShare {
+  id        String  @id @default(cuid())
+  expenseId String
+  expense   Expense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  amount    Int
+
+  @@unique([expenseId, userId])
+  @@index([userId])
+}
+
+model Settlement {
+  id        String   @id @default(cuid())
+  fromId    String
+  from      User     @relation("from", fields: [fromId], references: [id])
+  toId      String
+  to        User     @relation("to", fields: [toId], references: [id])
+  amount    Int
+  currency  String   @default("USD")
+  date      DateTime
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
