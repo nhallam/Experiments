@@ -9,40 +9,45 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(cuid())
-  name         String         @unique
-  createdAt    DateTime       @default(now())
-  paidExpenses Expense[]      @relation("payer")
-  shares       ExpenseShare[]
-  paymentsFrom Settlement[]   @relation("from")
-  paymentsTo   Settlement[]   @relation("to")
+  id                String             @id @default(cuid())
+  name              String             @unique
+  createdAt         DateTime           @default(now())
+  paidExpenses      Expense[]          @relation("payer")
+  shares            ExpenseShare[]
+  paymentsFrom      Settlement[]       @relation("from")
+  paymentsTo        Settlement[]       @relation("to")
+  recurringDefaults RecurringExpense[] @relation("recurringDefaultPayer")
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  icon     String?
-  expenses Expense[]
+  id                String             @id @default(cuid())
+  name              String             @unique
+  icon              String?
+  expenses          Expense[]
+  recurringExpenses RecurringExpense[]
 }
 
 model Expense {
-  id          String         @id @default(cuid())
-  amount      Int
-  currency    String         @default("USD")
-  payerId     String
-  payer       User           @relation("payer", fields: [payerId], references: [id])
-  categoryId  String?
-  category    Category?      @relation(fields: [categoryId], references: [id])
-  note        String?
-  receiptUrl  String?
-  date        DateTime
-  createdAt   DateTime       @default(now())
-  createdById String?
-  shares      ExpenseShare[]
+  id                 String            @id @default(cuid())
+  amount             Int
+  currency           String            @default("USD")
+  payerId            String
+  payer              User              @relation("payer", fields: [payerId], references: [id])
+  categoryId         String?
+  category           Category?         @relation(fields: [categoryId], references: [id])
+  recurringExpenseId String?
+  recurringExpense   RecurringExpense? @relation(fields: [recurringExpenseId], references: [id])
+  note               String?
+  receiptUrl         String?
+  date               DateTime
+  createdAt          DateTime          @default(now())
+  createdById        String?
+  shares             ExpenseShare[]
 
   @@index([date])
   @@index([payerId])
   @@index([categoryId])
+  @@index([recurringExpenseId])
 }
 
 model ExpenseShare {
@@ -73,4 +78,25 @@ model Settlement {
 model Setting {
   key   String @id
   value String
+}
+
+model RecurringExpense {
+  id             String    @id @default(cuid())
+  name           String
+  kind           String    @default("fixed")
+  defaultCents   Int       @default(0)
+  currency       String    @default("USD")
+  categoryId     String?
+  category       Category? @relation(fields: [categoryId], references: [id])
+  defaultPayerId String?
+  defaultPayer   User?     @relation("recurringDefaultPayer", fields: [defaultPayerId], references: [id])
+  dueDay         Int?
+  sharesBp       String
+  sortOrder      Int       @default(0)
+  archived       Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  expenses       Expense[]
+
+  @@index([archived])
+  @@index([sortOrder])
 }
