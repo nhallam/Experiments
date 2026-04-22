@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { BalancesPanel } from "@/components/BalancesPanel";
 import { ExpenseCard } from "@/components/ExpenseCard";
 import { RentCard } from "@/components/RentCard";
+import { ThisMonthsBills } from "@/components/ThisMonthsBills";
 import type { Expense } from "@/types";
 
 export default function HomePage() {
@@ -30,6 +31,8 @@ export default function HomePage() {
       <BalancesPanel />
 
       <RentCard />
+
+      <ThisMonthsBills />
 
       <section>
         <div className="mb-2 flex items-center justify-between">

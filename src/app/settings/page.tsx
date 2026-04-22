@@ -6,6 +6,7 @@ import { api } from "@/lib/api-client";
 import { useCurrentUserId } from "@/lib/identity";
 import { toCents, formatMoney } from "@/lib/money";
 import { RENT_BP_TOTAL } from "@/lib/validators";
+import { RecurringEditor } from "@/components/RecurringEditor";
 import type { Category, User } from "@/types";
 
 type RentConfig = {
@@ -85,7 +86,6 @@ export default function SettingsPage() {
     }
   })();
 
-  // Percent inputs are converted to basis points (50 → 5000, 33.33 → 3333).
   const rentSharesBp: Record<string, number> = {};
   for (const u of users) {
     const v = rentShareInputs[u.id];
@@ -328,6 +328,8 @@ export default function SettingsPage() {
           </p>
         )}
       </section>
+
+      <RecurringEditor users={users} categories={categories} />
 
       <section className="card p-5">
         <h2 className="mb-3 text-lg font-semibold">Categories</h2>
