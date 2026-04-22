@@ -66,16 +66,21 @@ export const expenseFilterSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 
+export const RENT_BP_TOTAL = 10000;
+
 export const rentConfigSchema = z
   .object({
     totalCents: z.number().int().nonnegative(),
-    shares: z.record(z.string().min(1), z.number().int().nonnegative()),
+    shares: z.record(
+      z.string().min(1),
+      z.number().int().nonnegative().max(RENT_BP_TOTAL),
+    ),
     defaultPayerId: z.string().min(1).nullable(),
   })
   .refine(
     (d) =>
-      Object.values(d.shares).reduce((s, n) => s + n, 0) === d.totalCents,
-    { message: "Share amounts must sum to the total.", path: ["shares"] },
+      Object.values(d.shares).reduce((s, n) => s + n, 0) === RENT_BP_TOTAL,
+    { message: "Percentages must add up to 100%.", path: ["shares"] },
   );
 
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;

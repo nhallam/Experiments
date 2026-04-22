@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api-client";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, splitByWeights } from "@/lib/money";
 import { todayISO } from "@/lib/format";
+import { RENT_BP_TOTAL } from "@/lib/validators";
 import type { Category, Expense, User } from "@/types";
 
 type RentConfig = {
@@ -93,14 +94,26 @@ export default function LogRentPage() {
   const configValid =
     config !== null &&
     config.totalCents > 0 &&
-    Object.values(config.shares).reduce((s, n) => s + n, 0) === config.totalCents;
+    Object.values(config.shares).reduce((s, n) => s + n, 0) === RENT_BP_TOTAL;
+
+  // Deterministic cents per user: sort by name, weight by basis points, drift
+  // lands on the last user alphabetically.
+  const centsByUser = useMemo(() => {
+    if (!config || !users || !configValid) return {} as Record<string, number>;
+    const ordered = [...users]
+      .filter((u) => (config.shares[u.id] ?? 0) > 0)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((u) => ({ id: u.id, weight: config.shares[u.id] }));
+    if (ordered.length === 0) return {};
+    return splitByWeights(config.totalCents, ordered);
+  }, [config, users, configValid]);
 
   const submit = async () => {
     if (!config || !rentCategory || !payerId) return;
     setError(null);
     setSubmitting(true);
     try {
-      const shares = Object.entries(config.shares)
+      const shares = Object.entries(centsByUser)
         .filter(([, amt]) => amt > 0)
         .map(([userId, amount]) => ({ userId, amount }));
       const payload = {
@@ -193,17 +206,28 @@ export default function LogRentPage() {
             <div>
               <p className="label">Split</p>
               <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200">
-                {users!.map((u) => (
-                  <li
-                    key={u.id}
-                    className="flex items-center justify-between px-3 py-2 text-sm"
-                  >
-                    <span>{u.name}</span>
-                    <span className="font-medium">
-                      {formatMoney(config!.shares[u.id] ?? 0)}
-                    </span>
-                  </li>
-                ))}
+                {users!.map((u) => {
+                  const bp = config!.shares[u.id] ?? 0;
+                  const pct = (bp / 100).toFixed(2).replace(/\.?0+$/, "");
+                  return (
+                    <li
+                      key={u.id}
+                      className="flex items-center justify-between px-3 py-2 text-sm"
+                    >
+                      <span>
+                        {u.name}
+                        {bp > 0 && (
+                          <span className="ml-2 text-xs text-neutral-500">
+                            {pct}%
+                          </span>
+                        )}
+                      </span>
+                      <span className="font-medium">
+                        {formatMoney(centsByUser[u.id] ?? 0)}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 

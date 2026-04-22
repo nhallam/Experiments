@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { api } from "@/lib/api-client";
 import { useCurrentUserId } from "@/lib/identity";
 import { toCents, formatMoney } from "@/lib/money";
+import { RENT_BP_TOTAL } from "@/lib/validators";
 import type { Category, User } from "@/types";
 
 type RentConfig = {
@@ -40,11 +41,15 @@ export default function SettingsPage() {
       setCategories(c);
       setRent(r);
       setRentTotalInput(r.totalCents ? (r.totalCents / 100).toFixed(2) : "");
+      const shareSum = Object.values(r.shares).reduce((s, n) => s + n, 0);
+      const validBp = shareSum === RENT_BP_TOTAL;
       setRentShareInputs(
         Object.fromEntries(
           u.map((user) => [
             user.id,
-            r.shares[user.id] ? (r.shares[user.id] / 100).toFixed(2) : "",
+            validBp && r.shares[user.id]
+              ? (r.shares[user.id] / 100).toString()
+              : "",
           ]),
         ),
       );
@@ -80,21 +85,23 @@ export default function SettingsPage() {
     }
   })();
 
-  const rentSharesCents: Record<string, number> = {};
+  // Percent inputs are converted to basis points (50 → 5000, 33.33 → 3333).
+  const rentSharesBp: Record<string, number> = {};
   for (const u of users) {
     const v = rentShareInputs[u.id];
     if (!v) {
-      rentSharesCents[u.id] = 0;
+      rentSharesBp[u.id] = 0;
       continue;
     }
     try {
-      rentSharesCents[u.id] = toCents(v);
+      rentSharesBp[u.id] = toCents(v);
     } catch {
-      rentSharesCents[u.id] = 0;
+      rentSharesBp[u.id] = 0;
     }
   }
-  const rentSharesSum = Object.values(rentSharesCents).reduce((s, n) => s + n, 0);
-  const rentRemainder = rentTotalCents - rentSharesSum;
+  const rentBpSum = Object.values(rentSharesBp).reduce((s, n) => s + n, 0);
+  const rentBpRemainder = RENT_BP_TOTAL - rentBpSum;
+  const formatBp = (bp: number) => (bp / 100).toFixed(2).replace(/\.00$/, "");
 
   const saveRent = async () => {
     setRentStatus(null);
@@ -102,11 +109,11 @@ export default function SettingsPage() {
       setRentStatus("Enter a rent total.");
       return;
     }
-    if (rentRemainder !== 0) {
+    if (rentBpRemainder !== 0) {
       setRentStatus(
-        rentRemainder > 0
-          ? `Shares are ${formatMoney(rentRemainder)} short of the total.`
-          : `Shares exceed total by ${formatMoney(-rentRemainder)}.`,
+        rentBpRemainder > 0
+          ? `${formatBp(rentBpRemainder)}% left to allocate.`
+          : `${formatBp(-rentBpRemainder)}% over 100%.`,
       );
       return;
     }
@@ -114,7 +121,7 @@ export default function SettingsPage() {
     try {
       const saved = await api.put<RentConfig>("/api/rent-config", {
         totalCents: rentTotalCents,
-        shares: rentSharesCents,
+        shares: rentSharesBp,
         defaultPayerId: rentPayerId,
       });
       setRent(saved);
@@ -226,44 +233,52 @@ export default function SettingsPage() {
         </div>
 
         <div className="mb-4">
-          <label className="label">Split</label>
+          <label className="label">Split (%)</label>
           <ul className="space-y-2">
-            {users.map((u) => (
-              <li key={u.id} className="flex items-center gap-3">
-                <span className="w-24 shrink-0 truncate text-sm">{u.name}</span>
-                <div className="relative flex-1">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
-                    $
+            {users.map((u) => {
+              const bp = rentSharesBp[u.id] ?? 0;
+              const cents = Math.round((rentTotalCents * bp) / RENT_BP_TOTAL);
+              return (
+                <li key={u.id} className="flex items-center gap-3">
+                  <span className="w-24 shrink-0 truncate text-sm">{u.name}</span>
+                  <div className="relative w-28 shrink-0">
+                    <input
+                      className="input pr-7"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={rentShareInputs[u.id] ?? ""}
+                      onChange={(e) =>
+                        setRentShareInputs((s) => ({ ...s, [u.id]: e.target.value }))
+                      }
+                    />
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                      %
+                    </span>
+                  </div>
+                  <span className="text-sm text-neutral-500">
+                    {rentTotalCents > 0 && bp > 0 ? formatMoney(cents) : "—"}
                   </span>
-                  <input
-                    className="input pl-7"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={rentShareInputs[u.id] ?? ""}
-                    onChange={(e) =>
-                      setRentShareInputs((s) => ({ ...s, [u.id]: e.target.value }))
-                    }
-                  />
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
           <p
             className={clsx(
               "mt-2 text-xs",
-              rentRemainder === 0 ? "text-neutral-500" : "text-red-600",
+              rentBpRemainder === 0 ? "text-neutral-500" : "text-red-600",
             )}
           >
-            {rentTotalCents > 0 && rentRemainder === 0
-              ? "Splits add up to the total."
-              : rentRemainder > 0
-                ? `${formatMoney(rentRemainder)} left to allocate.`
-                : rentRemainder < 0
-                  ? `${formatMoney(-rentRemainder)} over the total.`
-                  : "Enter a total above, then each person's share."}
+            {rentBpSum === 0
+              ? "Enter each person's percentage."
+              : rentBpRemainder === 0
+                ? "Adds up to 100%."
+                : rentBpRemainder > 0
+                  ? `${formatBp(rentBpRemainder)}% left to allocate.`
+                  : `${formatBp(-rentBpRemainder)}% over 100%.`}
           </p>
         </div>
 

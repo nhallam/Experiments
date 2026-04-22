@@ -1,6 +1,8 @@
 import { prisma } from "./prisma";
+import { splitByWeights } from "./money";
 
 export const RENT_CATEGORY_NAME = "Rent";
+export const RENT_BP_TOTAL = 10000;
 const KEY_TOTAL = "rent.total";
 const KEY_SHARES = "rent.shares";
 const KEY_DEFAULT_PAYER = "rent.defaultPayerId";
@@ -66,6 +68,23 @@ export async function saveRentConfig(config: RentConfig): Promise<void> {
       }),
     ),
   );
+}
+
+/**
+ * Turn stored basis-point shares into cents for a given total. Any rounding
+ * drift lands on the last user in the provided order — sort users by name
+ * for a deterministic result.
+ */
+export function rentCentsFromBp(
+  totalCents: number,
+  bpShares: RentShareMap,
+  orderedUserIds: string[],
+): Record<string, number> {
+  const weights = orderedUserIds
+    .filter((id) => (bpShares[id] ?? 0) > 0)
+    .map((id) => ({ id, weight: bpShares[id] }));
+  if (weights.length === 0) return {};
+  return splitByWeights(totalCents, weights);
 }
 
 export async function getRentCategoryId(): Promise<string | null> {
