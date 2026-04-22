@@ -60,6 +60,7 @@ export async function POST(req: Request) {
           currency: input.currency,
           payerId: input.payerId,
           categoryId: input.categoryId ?? null,
+          recurringExpenseId: input.recurringExpenseId ?? null,
           note: input.note ?? null,
           receiptUrl: input.receiptUrl ?? null,
           date: input.date,
