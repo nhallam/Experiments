@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api-client";
 import { BalancesPanel } from "@/components/BalancesPanel";
 import { ExpenseCard } from "@/components/ExpenseCard";
+import { RentCard } from "@/components/RentCard";
 import type { Expense } from "@/types";
 
 export default function HomePage() {
@@ -27,6 +28,8 @@ export default function HomePage() {
       </header>
 
       <BalancesPanel />
+
+      <RentCard />
 
       <section>
         <div className="mb-2 flex items-center justify-between">

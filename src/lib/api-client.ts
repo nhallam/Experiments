@@ -24,6 +24,7 @@ async function request<T>(method: string, path: string, body?: JsonBody): Promis
 export const api = {
   get: <T>(p: string) => request<T>("GET", p),
   post: <T>(p: string, body: JsonBody) => request<T>("POST", p, body),
+  put: <T>(p: string, body: JsonBody) => request<T>("PUT", p, body),
   patch: <T>(p: string, body: JsonBody) => request<T>("PATCH", p, body),
   delete: <T>(p: string) => request<T>("DELETE", p),
 };

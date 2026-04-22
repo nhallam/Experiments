@@ -66,5 +66,18 @@ export const expenseFilterSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 
+export const rentConfigSchema = z
+  .object({
+    totalCents: z.number().int().nonnegative(),
+    shares: z.record(z.string().min(1), z.number().int().nonnegative()),
+    defaultPayerId: z.string().min(1).nullable(),
+  })
+  .refine(
+    (d) =>
+      Object.values(d.shares).reduce((s, n) => s + n, 0) === d.totalCents,
+    { message: "Share amounts must sum to the total.", path: ["shares"] },
+  );
+
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
 export type CreateSettlementInput = z.infer<typeof createSettlementSchema>;
+export type RentConfigInput = z.infer<typeof rentConfigSchema>;
