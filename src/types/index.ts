@@ -24,6 +24,7 @@ export type Expense = {
   currency: string;
   payerId: string;
   categoryId: string | null;
+  recurringExpenseId: string | null;
   note: string | null;
   receiptUrl: string | null;
   date: string;
@@ -32,6 +33,22 @@ export type Expense = {
   payer?: User;
   category?: Category | null;
   shares?: ExpenseShare[];
+};
+
+export type RecurringExpense = {
+  id: string;
+  name: string;
+  kind: "fixed" | "variable";
+  defaultCents: number;
+  currency: string;
+  categoryId: string | null;
+  defaultPayerId: string | null;
+  dueDay: number | null;
+  sharesBp: Record<string, number>;
+  sortOrder: number;
+  archived: boolean;
+  createdAt: string;
+  category?: Category | null;
 };
 
 export type Settlement = {
