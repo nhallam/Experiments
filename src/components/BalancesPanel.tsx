@@ -1,21 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import clsx from "clsx";
 import { api } from "@/lib/api-client";
 import { useCurrentUserId } from "@/lib/identity";
 import { formatMoney, formatSigned } from "@/lib/money";
-import type { NetBalance, SimplifiedTransfer } from "@/types";
+import type { Category, NetBalance, SimplifiedTransfer } from "@/types";
 
 export function BalancesPanel() {
   const [currentId] = useCurrentUserId();
   const [nets, setNets] = useState<NetBalance[] | null>(null);
   const [transfers, setTransfers] = useState<SimplifiedTransfer[] | null>(null);
+  const [categories, setCategories] = useState<Category[] | null>(null);
+  const [excludeRent, setExcludeRent] = useState(false);
+
+  useEffect(() => {
+    api
+      .get<Category[]>("/api/categories")
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  const rentCategoryId = useMemo(
+    () => categories?.find((c) => c.name === "Rent")?.id ?? null,
+    [categories],
+  );
 
   useEffect(() => {
     let cancel = false;
+    const qs =
+      excludeRent && rentCategoryId
+        ? `?excludeCategoryIds=${rentCategoryId}`
+        : "";
     Promise.all([
-      api.get<NetBalance[]>("/api/balances"),
-      api.get<SimplifiedTransfer[]>("/api/balances/simplified"),
+      api.get<NetBalance[]>(`/api/balances${qs}`),
+      api.get<SimplifiedTransfer[]>(`/api/balances/simplified${qs}`),
     ])
       .then(([n, t]) => {
         if (cancel) return;
@@ -30,7 +49,7 @@ export function BalancesPanel() {
     return () => {
       cancel = true;
     };
-  }, [currentId]);
+  }, [currentId, excludeRent, rentCategoryId]);
 
   if (nets === null || transfers === null) {
     return <div className="card p-5 text-sm text-neutral-500">Loading balances…</div>;
@@ -43,26 +62,64 @@ export function BalancesPanel() {
   return (
     <div className="space-y-3">
       <div className="card p-5">
-        <p className="text-sm text-neutral-500">Your balance</p>
-        <p
-          className={
-            "mt-1 text-3xl font-semibold " +
-            (myNet && myNet.net > 0
-              ? "text-green-600"
-              : myNet && myNet.net < 0
-                ? "text-red-600"
-                : "text-neutral-700")
-          }
-        >
-          {formatSigned(myNet?.net ?? 0)}
-        </p>
-        <p className="text-sm text-neutral-500">
-          {myNet && myNet.net > 0
-            ? "You are owed overall"
-            : myNet && myNet.net < 0
-              ? "You owe overall"
-              : "All settled up"}
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm text-neutral-500">Your balance</p>
+            <p
+              className={
+                "mt-1 text-3xl font-semibold " +
+                (myNet && myNet.net > 0
+                  ? "text-green-600"
+                  : myNet && myNet.net < 0
+                    ? "text-red-600"
+                    : "text-neutral-700")
+              }
+            >
+              {formatSigned(myNet?.net ?? 0)}
+            </p>
+            <p className="text-sm text-neutral-500">
+              {myNet && myNet.net > 0
+                ? "You are owed overall"
+                : myNet && myNet.net < 0
+                  ? "You owe overall"
+                  : "All settled up"}
+            </p>
+          </div>
+          {rentCategoryId && (
+            <div className="inline-flex shrink-0 rounded-full border border-neutral-200 bg-neutral-50 p-0.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setExcludeRent(false)}
+                className={clsx(
+                  "rounded-full px-3 py-1 transition-colors",
+                  !excludeRent
+                    ? "bg-white font-medium text-neutral-900 shadow-sm"
+                    : "text-neutral-500",
+                )}
+              >
+                Incl. rent
+              </button>
+              <button
+                type="button"
+                onClick={() => setExcludeRent(true)}
+                className={clsx(
+                  "rounded-full px-3 py-1 transition-colors",
+                  excludeRent
+                    ? "bg-white font-medium text-neutral-900 shadow-sm"
+                    : "text-neutral-500",
+                )}
+              >
+                Excl. rent
+              </button>
+            </div>
+          )}
+        </div>
+        {excludeRent && (
+          <p className="mt-2 text-xs text-neutral-500">
+            Rent expenses and all settlements hidden — shows non-rent debt as if
+            no payments had been made.
+          </p>
+        )}
       </div>
 
       {(myOwes.length > 0 || myOwed.length > 0) && (

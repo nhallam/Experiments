@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import clsx from "clsx";
 import { api } from "@/lib/api-client";
 import { useCurrentUserId } from "@/lib/identity";
+import { toCents, formatMoney } from "@/lib/money";
 import type { Category, User } from "@/types";
+
+type RentConfig = {
+  totalCents: number;
+  shares: Record<string, number>;
+  defaultPayerId: string | null;
+};
 
 export default function SettingsPage() {
   const [currentId, setCurrentId] = useCurrentUserId();
@@ -15,13 +23,32 @@ export default function SettingsPage() {
   const [newIcon, setNewIcon] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const [rent, setRent] = useState<RentConfig | null>(null);
+  const [rentTotalInput, setRentTotalInput] = useState("");
+  const [rentShareInputs, setRentShareInputs] = useState<Record<string, string>>({});
+  const [rentPayerId, setRentPayerId] = useState<string | null>(null);
+  const [rentSaving, setRentSaving] = useState(false);
+  const [rentStatus, setRentStatus] = useState<string | null>(null);
+
   const refresh = () => {
     Promise.all([
       api.get<User[]>("/api/users"),
       api.get<Category[]>("/api/categories"),
-    ]).then(([u, c]) => {
+      api.get<RentConfig>("/api/rent-config"),
+    ]).then(([u, c, r]) => {
       setUsers(u);
       setCategories(c);
+      setRent(r);
+      setRentTotalInput(r.totalCents ? (r.totalCents / 100).toFixed(2) : "");
+      setRentShareInputs(
+        Object.fromEntries(
+          u.map((user) => [
+            user.id,
+            r.shares[user.id] ? (r.shares[user.id] / 100).toFixed(2) : "",
+          ]),
+        ),
+      );
+      setRentPayerId(r.defaultPayerId);
     });
   };
 
@@ -41,6 +68,61 @@ export default function SettingsPage() {
       refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
+    }
+  };
+
+  const rentTotalCents = (() => {
+    if (!rentTotalInput) return 0;
+    try {
+      return toCents(rentTotalInput);
+    } catch {
+      return 0;
+    }
+  })();
+
+  const rentSharesCents: Record<string, number> = {};
+  for (const u of users) {
+    const v = rentShareInputs[u.id];
+    if (!v) {
+      rentSharesCents[u.id] = 0;
+      continue;
+    }
+    try {
+      rentSharesCents[u.id] = toCents(v);
+    } catch {
+      rentSharesCents[u.id] = 0;
+    }
+  }
+  const rentSharesSum = Object.values(rentSharesCents).reduce((s, n) => s + n, 0);
+  const rentRemainder = rentTotalCents - rentSharesSum;
+
+  const saveRent = async () => {
+    setRentStatus(null);
+    if (rentTotalCents <= 0) {
+      setRentStatus("Enter a rent total.");
+      return;
+    }
+    if (rentRemainder !== 0) {
+      setRentStatus(
+        rentRemainder > 0
+          ? `Shares are ${formatMoney(rentRemainder)} short of the total.`
+          : `Shares exceed total by ${formatMoney(-rentRemainder)}.`,
+      );
+      return;
+    }
+    setRentSaving(true);
+    try {
+      const saved = await api.put<RentConfig>("/api/rent-config", {
+        totalCents: rentTotalCents,
+        shares: rentSharesCents,
+        defaultPayerId: rentPayerId,
+      });
+      setRent(saved);
+      setRentStatus("Saved.");
+    } catch (e) {
+      setRentStatus(e instanceof Error ? e.message : "Failed to save rent.");
+    } finally {
+      setRentSaving(false);
     }
   };
 
@@ -115,6 +197,121 @@ export default function SettingsPage() {
         <button className="btn-secondary" onClick={() => setCurrentId(null)}>
           Switch user
         </button>
+      </section>
+
+      <section className="card p-5">
+        <h2 className="mb-1 text-lg font-semibold">Rent</h2>
+        <p className="mb-4 text-sm text-neutral-600">
+          The monthly total and how it&apos;s split. Used when you log a rent
+          payment.
+        </p>
+
+        <div className="mb-4">
+          <label className="label">Monthly total</label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+              $
+            </span>
+            <input
+              className="input pl-7"
+              type="number"
+              step="0.01"
+              min="0"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={rentTotalInput}
+              onChange={(e) => setRentTotalInput(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <label className="label">Split</label>
+          <ul className="space-y-2">
+            {users.map((u) => (
+              <li key={u.id} className="flex items-center gap-3">
+                <span className="w-24 shrink-0 truncate text-sm">{u.name}</span>
+                <div className="relative flex-1">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                    $
+                  </span>
+                  <input
+                    className="input pl-7"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={rentShareInputs[u.id] ?? ""}
+                    onChange={(e) =>
+                      setRentShareInputs((s) => ({ ...s, [u.id]: e.target.value }))
+                    }
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p
+            className={clsx(
+              "mt-2 text-xs",
+              rentRemainder === 0 ? "text-neutral-500" : "text-red-600",
+            )}
+          >
+            {rentTotalCents > 0 && rentRemainder === 0
+              ? "Splits add up to the total."
+              : rentRemainder > 0
+                ? `${formatMoney(rentRemainder)} left to allocate.`
+                : rentRemainder < 0
+                  ? `${formatMoney(-rentRemainder)} over the total.`
+                  : "Enter a total above, then each person's share."}
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <label className="label">Default payer</label>
+          <div className="flex flex-wrap gap-2">
+            {users.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                className={clsx("chip", rentPayerId === u.id && "chip-active")}
+                onClick={() => setRentPayerId(u.id)}
+              >
+                {u.name}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-neutral-500">
+            Whoever pays the landlord. You can change it when logging.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={saveRent}
+            disabled={rentSaving}
+          >
+            {rentSaving ? "Saving…" : "Save rent settings"}
+          </button>
+          {rentStatus && (
+            <span
+              className={clsx(
+                "text-sm",
+                rentStatus === "Saved." ? "text-green-600" : "text-red-600",
+              )}
+            >
+              {rentStatus}
+            </span>
+          )}
+        </div>
+
+        {rent && rent.totalCents > 0 && (
+          <p className="mt-3 text-xs text-neutral-500">
+            Saved: {formatMoney(rent.totalCents)}/mo.
+          </p>
+        )}
       </section>
 
       <section className="card p-5">
