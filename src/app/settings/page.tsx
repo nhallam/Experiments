@@ -361,6 +361,21 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      <section className="card p-5">
+        <h2 className="mb-1 text-lg font-semibold">Export</h2>
+        <p className="mb-3 text-sm text-neutral-600">
+          Download every expense as a CSV — one row per expense with each
+          housemate&apos;s share in its own column.
+        </p>
+        <a
+          className="btn-secondary inline-block"
+          href="/api/expenses/export"
+          download
+        >
+          Download CSV
+        </a>
+      </section>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
     </main>
   );
