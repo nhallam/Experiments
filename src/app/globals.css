@@ -29,7 +29,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors;
   }
   .btn-primary {
-    @apply btn bg-brand text-white hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply btn text-white bg-gradient-to-b from-[#FF00B7] to-[#FF0000] hover:from-[#CC0092] hover:to-[#CC0000] disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
     @apply btn bg-neutral-100 text-neutral-900 hover:bg-neutral-200;
