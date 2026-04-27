@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <DemoBanner />
-        <div className="mx-auto flex min-h-screen max-w-xl flex-col pb-20">
+        <div className="mx-auto flex min-h-screen max-w-xl flex-col pb-24">
           <AppBootstrap>{children}</AppBootstrap>
         </div>
         <BottomNav />

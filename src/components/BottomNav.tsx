@@ -41,26 +41,24 @@ export function BottomNav() {
   );
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white">
-      <div className="mx-auto flex max-w-xl items-stretch justify-between">
-        {ITEMS.map((item) => {
-          const active = item.href === activeHref;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={clsx(
-                "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
-                active ? "text-brand-dark" : "text-neutral-500",
-              )}
-            >
-              <Icon size={22} />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <nav className="fixed bottom-3 left-3 right-3 z-40 mx-auto flex max-w-xl items-stretch justify-between rounded-2xl border border-neutral-200 bg-white shadow-lg">
+      {ITEMS.map((item) => {
+        const active = item.href === activeHref;
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={clsx(
+              "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
+              active ? "text-brand-dark" : "text-neutral-500",
+            )}
+          >
+            <Icon size={22} />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }
