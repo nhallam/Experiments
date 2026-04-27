@@ -22,18 +22,29 @@ const ITEMS: { href: string; label: string; icon: NavIcon }[] = [
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
+function matches(href: string, pathname: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(href + "/");
+}
+
 export function BottomNav() {
   const pathname = usePathname();
   if (pathname === "/onboarding") return null;
+
+  // Pick the longest matching href so /expenses/new wins over /expenses.
+  const activeHref = ITEMS.reduce(
+    (best, item) =>
+      matches(item.href, pathname) && item.href.length > best.length
+        ? item.href
+        : best,
+    "",
+  );
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-xl items-stretch justify-between">
         {ITEMS.map((item) => {
-          const active =
-            item.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(item.href);
+          const active = item.href === activeHref;
           const Icon = item.icon;
           return (
             <Link
