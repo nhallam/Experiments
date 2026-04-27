@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { BottomNav } from "@/components/BottomNav";
 import { AppBootstrap } from "@/components/AppBootstrap";
 import { InstallHint } from "@/components/InstallHint";
+import { DemoBanner } from "@/components/DemoBanner";
 
 export const metadata: Metadata = {
   title: "Splitty",
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <DemoBanner />
         <div className="mx-auto flex min-h-screen max-w-xl flex-col pb-20">
           <AppBootstrap>{children}</AppBootstrap>
         </div>
