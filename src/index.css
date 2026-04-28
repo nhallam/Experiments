@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #f7f5ef;
+  color: #1f2f1a;
+  -webkit-font-smoothing: antialiased;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.leaflet-container {
+  font-family: inherit;
+}
+
+.poi-marker {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: #36502d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 2px solid #f7f5ef;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.poi-marker.near {
+  background: #c2410c;
+  animation: pulse 1.4s infinite;
+}
+
+.hiker-marker {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #2563eb;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px #2563eb, 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(194, 65, 12, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(194, 65, 12, 0);
+  }
+}
