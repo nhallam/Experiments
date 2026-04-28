@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { POI } from "../lib/types";
 
 type Props = {
@@ -7,10 +7,61 @@ type Props = {
   onDismiss: () => void;
 };
 
+function PlaceholderArt({
+  title,
+  author,
+  year,
+}: {
+  title: string;
+  author: string;
+  year?: number;
+}) {
+  return (
+    <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-forest-100">
+      <svg
+        viewBox="0 0 400 300"
+        className="absolute inset-0 w-full h-full"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f3e8c8" />
+            <stop offset="60%" stopColor="#e7d39a" />
+            <stop offset="100%" stopColor="#c9a86a" />
+          </linearGradient>
+        </defs>
+        <rect width="400" height="300" fill="url(#sky)" />
+        <circle cx="310" cy="70" r="28" fill="#fff5d8" opacity="0.85" />
+        <polygon points="0,300 80,150 150,210 220,120 290,200 360,140 400,220 400,300" fill="#36502d" />
+        <polygon points="0,300 60,200 130,250 190,180 260,240 320,200 400,260 400,300" fill="#2b4023" />
+        <polygon points="0,300 50,260 130,280 200,250 280,275 360,255 400,280 400,300" fill="#1f2f1a" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-end text-center p-4 bg-gradient-to-t from-black/55 via-black/15 to-transparent">
+        <div className="text-white font-serif text-lg leading-tight drop-shadow">
+          {title}
+        </div>
+        <div className="text-white/90 text-xs mt-1 drop-shadow">
+          {author}
+          {year ? `, ${year}` : ""}
+        </div>
+        <div className="text-white/70 text-[10px] mt-2 uppercase tracking-wide">
+          Image unavailable — illustrated placeholder
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ArtworkCard({ poi, distanceM, onDismiss }: Props) {
   const [index, setIndex] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
   const art = poi.artworks[index];
   const total = poi.artworks.length;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [index, poi.id]);
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[1000] sm:inset-auto sm:bottom-6 sm:right-6 sm:max-w-md">
@@ -37,12 +88,21 @@ export function ArtworkCard({ poi, distanceM, onDismiss }: Props) {
         <div className="px-4 py-4">
           {art.kind === "image" ? (
             <figure className="space-y-2">
-              <img
-                src={art.imageUrl}
-                alt={`${art.title} by ${art.author}`}
-                className="w-full rounded-lg border border-forest-100 bg-forest-50"
-                loading="lazy"
-              />
+              {imageFailed ? (
+                <PlaceholderArt
+                  title={art.title}
+                  author={art.author}
+                  year={art.year}
+                />
+              ) : (
+                <img
+                  src={art.imageUrl}
+                  alt={`${art.title} by ${art.author}`}
+                  className="w-full rounded-lg border border-forest-100 bg-forest-50"
+                  loading="lazy"
+                  onError={() => setImageFailed(true)}
+                />
+              )}
               <figcaption className="text-sm text-forest-800">
                 <span className="font-semibold">{art.title}</span> · {art.author}
                 {art.year ? `, ${art.year}` : ""}
