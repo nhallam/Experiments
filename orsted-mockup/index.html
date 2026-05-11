@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ørsted — content switcher mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #002b3d;
+    --ink-2: #001a2c;
+    --cream: #f1ece4;
+    --cream-2: #faf6f0;
+    --paper: #ffffff;
+    --line: #d8d2c4;
+    --muted: #5b7280;
+    --accent: #ff7a59;       /* coral CTA accent */
+    --accent-2: #ffc72c;     /* warm highlight */
+    --blue-2: #b9c9d6;
+    --shadow: 0 12px 40px rgba(0, 43, 61, .08);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 500; letter-spacing: -0.01em; line-height: 1.05; margin: 0; }
+  h1 { font-size: clamp(2.4rem, 5vw, 4.6rem); }
+  h2 { font-size: clamp(1.8rem, 3.4vw, 3rem); }
+  h3 { font-size: 1.25rem; font-weight: 600; }
+  p { margin: 0; }
+
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+  /* ============ Nav ============ */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(241, 236, 228, 0.92);
+    backdrop-filter: saturate(140%) blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--ink);
+    position: relative;
+  }
+  .logo-mark::after {
+    content: ''; position: absolute; inset: 6px;
+    border-radius: 50%; border: 2px solid var(--cream);
+    border-top-color: transparent;
+    transform: rotate(35deg);
+  }
+  .nav ul { list-style: none; display: flex; gap: 28px; padding: 0; margin: 0; font-size: 0.95rem; }
+  .nav ul a { opacity: 0.85; }
+  .nav ul a:hover { opacity: 1; }
+  .nav-actions { display: flex; align-items: center; gap: 18px; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: transparent;
+    display: grid; place-items: center; color: var(--ink); cursor: pointer;
+  }
+
+  /* ============ Buttons ============ */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px;
+    font-weight: 600; font-size: 0.98rem; cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .btn-primary { background: var(--ink); color: var(--cream); }
+  .btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .btn-ghost:hover { background: var(--ink); color: var(--cream); }
+  .btn-light { background: var(--cream); color: var(--ink); }
+  .btn-light:hover { background: var(--paper); }
+  .btn .arrow { display: inline-block; transition: transform .15s ease; }
+  .btn:hover .arrow { transform: translateX(3px); }
+
+  /* ============ Hero ============ */
+  .hero { padding: 56px 0 88px; }
+  .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.7; margin-bottom: 22px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 28px; height: 1px; background: currentColor;
+  }
+  .hero p.lede { font-size: 1.18rem; max-width: 52ch; color: var(--ink); opacity: 0.85; margin-top: 24px; }
+  .hero-ctas { display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+  .hero-visual {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(160deg, #cfe0ec 0%, #889fb1 100%);
+    box-shadow: var(--shadow);
+  }
+  .hero-visual svg { width: 100%; height: 100%; }
+  .hero-badge {
+    position: absolute; left: 22px; bottom: 22px;
+    background: var(--cream); color: var(--ink);
+    padding: 12px 16px; border-radius: 12px;
+    font-size: 0.85rem; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  }
+  .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); }
+
+  /* ============ What we do / 3-up ============ */
+  .three-up { padding: 88px 0; background: var(--cream-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .section-head { display: flex; justify-content: space-between; align-items: end; gap: 32px; margin-bottom: 40px; flex-wrap: wrap; }
+  .section-head .lede { max-width: 46ch; color: var(--ink); opacity: 0.8; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card {
+    background: var(--paper);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .card-art {
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(160deg, #b9c9d6 0%, #5b7e95 100%);
+    position: relative; overflow: hidden;
+  }
+  .card-art svg { width: 100%; height: 100%; }
+  .card-body { padding: 24px 24px 28px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .card-eyebrow { font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+  .card-link { margin-top: auto; padding-top: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+  .card-link .arrow { transition: transform .15s ease; }
+  .card:hover .card-link .arrow { transform: translateX(4px); }
+
+  /* numbers variant */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .stat {
+    background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 36px 28px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .stat .num { font-family: 'Fraunces', serif; font-size: clamp(2.6rem, 4.2vw, 4rem); line-height: 1; }
+  .stat .label { font-size: 0.95rem; opacity: 0.75; }
+
+  /* ============ Big statement (dark) ============ */
+  .statement { background: var(--ink); color: var(--cream); padding: 120px 0; position: relative; overflow: hidden; }
+  .statement::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(60% 80% at 80% 20%, rgba(255,199,44,.18), transparent 60%),
+                radial-gradient(50% 60% at 10% 90%, rgba(255,122,89,.12), transparent 70%);
+    pointer-events: none;
+  }
+  .statement .container { position: relative; }
+  .statement h2 { max-width: 22ch; font-size: clamp(2.2rem, 4.4vw, 4rem); }
+  .statement p.lede { max-width: 56ch; margin-top: 28px; opacity: 0.85; font-size: 1.1rem; }
+  .statement .btn-primary { background: var(--cream); color: var(--ink); }
+  .statement .btn-primary:hover { background: white; }
+
+  /* ============ News ============ */
+  .news { padding: 96px 0; }
+  .news .cards { gap: 24px; }
+  .news .card { background: var(--paper); }
+  .news .card-art.thin { aspect-ratio: 16 / 9; }
+
+  /* ============ Careers banner ============ */
+  .careers { padding: 0 0 96px; }
+  .careers-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--ink); color: var(--cream);
+    min-height: 420px;
+  }
+  .careers-copy { padding: 56px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+  .careers-copy h2 { color: var(--cream); }
+  .careers-copy p { opacity: 0.85; max-width: 42ch; }
+  .careers-art { background: linear-gradient(140deg, #5b7e95 0%, #002b3d 100%); position: relative; overflow: hidden; }
+  .careers-art svg { width: 100%; height: 100%; }
+  .careers .btn-primary { background: var(--accent); color: white; align-self: flex-start; }
+  .careers .btn-primary:hover { background: #e96545; }
+
+  /* ============ Footer CTA ============ */
+  .footer-cta { padding: 88px 0 32px; }
+  .footer-cta-wrap {
+    background: var(--cream-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 56px;
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: center;
+  }
+  .footer-cta h2 { max-width: 18ch; }
+  .footer-cta .lede { opacity: 0.8; margin-top: 16px; max-width: 40ch; }
+  .signup { display: flex; gap: 8px; }
+  .signup input {
+    flex: 1; padding: 16px 18px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+    font: inherit; outline: none;
+  }
+  .signup input:focus { border-color: var(--ink); }
+  .signup .btn-primary { white-space: nowrap; }
+  .cta-points { display: grid; gap: 14px; }
+  .cta-points li { display: flex; align-items: start; gap: 12px; }
+  .cta-points li::before {
+    content: ''; width: 18px; height: 18px; border-radius: 50%; flex: 0 0 18px;
+    background: var(--accent-2); margin-top: 3px;
+  }
+  ul.plain { list-style: none; padding: 0; margin: 0; }
+
+  /* ============ Footer ============ */
+  .footer { background: var(--ink); color: var(--cream); padding: 56px 0 32px; }
+  .footer .columns { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 32px; margin-bottom: 32px; }
+  .footer h4 { font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; margin: 0 0 16px; font-weight: 600; font-family: 'Inter', sans-serif; }
+  .footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; font-size: 0.95rem; }
+  .footer ul a { opacity: 0.85; }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,.12); padding-top: 20px; display: flex; justify-content: space-between; font-size: 0.85rem; opacity: 0.7; }
+
+  /* ============ Control panel ============ */
+  .switcher {
+    position: fixed; right: 20px; bottom: 20px; z-index: 100;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: 0 18px 50px rgba(0, 43, 61, 0.22);
+    width: 320px; max-width: calc(100vw - 40px);
+    font-size: 0.92rem;
+    overflow: hidden;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .switcher.collapsed .switcher-body { display: none; }
+  .switcher.collapsed { width: auto; }
+  .switcher-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 14px 16px; background: var(--ink); color: var(--cream); cursor: pointer;
+  }
+  .switcher-head h5 { margin: 0; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .switcher-head .pulse {
+    width: 9px; height: 9px; border-radius: 50%; background: var(--accent-2);
+    box-shadow: 0 0 0 0 rgba(255, 199, 44, 0.7);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 199, 44, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(255, 199, 44, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 199, 44, 0); }
+  }
+  .switcher-toggle { background: transparent; border: 0; color: var(--cream); cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 4px; }
+  .switcher-body { padding: 14px 16px 16px; max-height: 60vh; overflow: auto; }
+  .switcher-row { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .switcher-row:last-of-type { border-bottom: 0; }
+  .switcher-row .row-label { font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .switcher-row .row-label .preview { font-weight: 400; font-size: 0.78rem; opacity: 0.6; }
+  .pill-group { display: flex; gap: 6px; }
+  .pill {
+    flex: 1; padding: 8px 0; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--paper);
+    cursor: pointer; font: inherit; font-size: 0.85rem; color: var(--ink);
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .pill:hover { border-color: var(--ink); }
+  .pill.active { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+  .switcher-foot { display: flex; gap: 8px; padding-top: 12px; margin-top: 6px; border-top: 1px solid var(--line); }
+  .switcher-foot button {
+    flex: 1; padding: 9px 0; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--cream-2); color: var(--ink); font: inherit; font-size: 0.85rem; cursor: pointer;
+  }
+  .switcher-foot button:hover { background: var(--cream); }
+
+  /* ============ Responsive ============ */
+  @media (max-width: 900px) {
+    .hero-grid, .careers-wrap, .footer-cta-wrap { grid-template-columns: 1fr; }
+    .cards, .stats { grid-template-columns: 1fr; }
+    .footer .columns { grid-template-columns: 1fr 1fr; }
+    .nav ul { display: none; }
+    .careers-art { min-height: 280px; }
+    .hero { padding: 32px 0 56px; }
+    .three-up, .news, .footer-cta { padding: 56px 0; }
+    .statement { padding: 80px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============== Top nav (not switchable) ============== -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="logo" href="#">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span>Ørsted</span>
+    </a>
+    <nav>
+      <ul>
+        <li><a href="#">Our energy solutions</a></li>
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Newsroom</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Investors</a></li>
+      </ul>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn" aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
+      <button class="btn btn-ghost" style="padding:10px 18px">Contact us</button>
+    </div>
+  </div>
+</header>
+
+<!-- ============== Hero ============== -->
+<section class="hero" data-section="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <div class="hero-eyebrow" data-slot="hero-eyebrow">For a world that runs entirely on green energy</div>
+      <h1 data-slot="hero-headline">Love your home. Power it with clean energy.</h1>
+      <p class="lede" data-slot="hero-lede">Switch to a clean energy plan with Ørsted and make a real impact in your community — without lifting more than a finger.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#"><span data-slot="hero-cta-1">Find a plan</span> <span class="arrow">→</span></a>
+        <a class="btn btn-ghost" href="#"><span data-slot="hero-cta-2">How it works</span></a>
+      </div>
+    </div>
+    <div class="hero-visual" data-slot="hero-visual">
+      <!-- SVG injected by variant -->
+    </div>
+  </div>
+</section>
+
+<!-- ============== Three-up ============== -->
+<section class="three-up" data-section="threeup">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="hero-eyebrow" data-slot="threeup-eyebrow">What we do</div>
+        <h2 data-slot="threeup-headline">Building the clean energy backbone of America.</h2>
+      </div>
+      <p class="lede" data-slot="threeup-lede">From offshore wind off the East Coast to solar across the heartland, we develop, build, and operate at scale — for the long haul.</p>
+    </div>
+    <div data-slot="threeup-grid">
+      <!-- variant injects either .cards or .stats -->
+    </div>
+  </div>
+</section>
+
+<!-- ============== Big statement ============== -->
+<section class="statement" data-section="statement">
+  <div class="container">
+    <div class="hero-eyebrow" style="color: var(--cream); opacity:.7" data-slot="statement-eyebrow">Our commitment</div>
+    <h2 data-slot="statement-headline">Net-zero by 2040. No offsets, no excuses.</h2>
+    <p class="lede" data-slot="statement-lede">We don't talk about climate ambition — we run on a science-based plan. Already 90% renewable. Coal-free since 2023.</p>
+    <div style="margin-top: 36px;">
+      <a class="btn btn-primary" href="#"><span data-slot="statement-cta">Read our climate plan</span> <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============== News ============== -->
+<section class="news" data-section="news">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <div class="hero-eyebrow" data-slot="news-eyebrow">Newsroom</div>
+        <h2 data-slot="news-headline">Latest from Ørsted</h2>
+      </div>
+      <a class="btn btn-ghost" href="#" style="padding:10px 18px"><span data-slot="news-cta">See all news</span> <span class="arrow">→</span></a>
+    </div>
+    <div class="cards" data-slot="news-grid"></div>
+  </div>
+</section>
+
+<!-- ============== Careers banner ============== -->
+<section class="careers" data-section="careers">
+  <div class="container">
+    <div class="careers-wrap">
+      <div class="careers-copy">
+        <div class="hero-eyebrow" style="color: var(--cream); opacity:.7" data-slot="careers-eyebrow">Careers</div>
+        <h2 data-slot="careers-headline">Build your career in clean energy.</h2>
+        <p data-slot="careers-lede">Join the team building the offshore wind, onshore wind, and solar projects that power millions of American homes.</p>
+        <a class="btn btn-primary" href="#"><span data-slot="careers-cta">See open roles</span> <span class="arrow">→</span></a>
+      </div>
+      <div class="careers-art" data-slot="careers-visual"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Footer CTA ============== -->
+<section class="footer-cta" data-section="footercta">
+  <div class="container">
+    <div class="footer-cta-wrap">
+      <div>
+        <div class="hero-eyebrow" data-slot="footercta-eyebrow">Stay in the loop</div>
+        <h2 data-slot="footercta-headline">Clean energy news, every two weeks.</h2>
+        <p class="lede" data-slot="footercta-lede">Project updates, climate insight, and the occasional good news story. No spam — ever.</p>
+        <div style="margin-top: 28px;" data-slot="footercta-action">
+          <!-- variant injects either signup form, contact buttons, or partner pitch -->
+        </div>
+      </div>
+      <ul class="plain cta-points" data-slot="footercta-points"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============== Footer ============== -->
+<footer class="footer">
+  <div class="container">
+    <div class="columns">
+      <div>
+        <a class="logo" href="#" style="color: var(--cream); margin-bottom: 14px;">
+          <span class="logo-mark" style="background: var(--cream);"></span>
+          <span>Ørsted</span>
+        </a>
+        <p style="opacity: .7; max-width: 30ch; margin-top: 14px; font-size: 0.92rem;">For a world that runs entirely on green energy.</p>
+      </div>
+      <div>
+        <h4>Solutions</h4>
+        <ul>
+          <li><a href="#">Offshore wind</a></li>
+          <li><a href="#">Onshore wind</a></li>
+          <li><a href="#">Solar & storage</a></li>
+          <li><a href="#">Power-to-X</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Newsroom</a></li>
+          <li><a href="#">Sustainability</a></li>
+          <li><a href="#">Investors</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Careers</h4>
+        <ul>
+          <li><a href="#">Open roles</a></li>
+          <li><a href="#">Graduates</a></li>
+          <li><a href="#">Culture</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="#">Talk to us</a></li>
+          <li><a href="#">Find an office</a></li>
+          <li><a href="#">Media inquiries</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© Ørsted A/S — mockup, not affiliated</span>
+      <span>Privacy · Cookies · Terms</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============== Control panel ============== -->
+<aside class="switcher" id="switcher" aria-label="Content variant switcher">
+  <div class="switcher-head" id="switcher-head">
+    <h5><span class="pulse"></span> Content variants</h5>
+    <button class="switcher-toggle" id="switcher-toggle" aria-label="Toggle">–</button>
+  </div>
+  <div class="switcher-body" id="switcher-body"></div>
+</aside>
+
+<script>
+// ============================================================
+//  Variants
+// ============================================================
+
+const SVG = {
+  windField: `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dbe6ee"/><stop offset="1" stop-color="#8fa9bd"/></linearGradient>
+      <linearGradient id="ground1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7d9683"/><stop offset="1" stop-color="#3a5042"/></linearGradient>
+    </defs>
+    <rect width="400" height="340" fill="url(#sky1)"/>
+    <circle cx="300" cy="120" r="50" fill="#ffd573" opacity=".7"/>
+    <path d="M0 340 Q200 280 400 340 L400 500 L0 500 Z" fill="url(#ground1)"/>
+    <g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none">
+      <g transform="translate(110 300)"><line x1="0" y1="0" x2="0" y2="-130"/><circle cx="0" cy="-130" r="4" fill="#fff"/><line x1="0" y1="-130" x2="40" y2="-160"/><line x1="0" y1="-130" x2="-40" y2="-160"/><line x1="0" y1="-130" x2="0" y2="-90"/></g>
+      <g transform="translate(220 320)"><line x1="0" y1="0" x2="0" y2="-160"/><circle cx="0" cy="-160" r="5" fill="#fff"/><line x1="0" y1="-160" x2="48" y2="-195"/><line x1="0" y1="-160" x2="-48" y2="-195"/><line x1="0" y1="-160" x2="0" y2="-110"/></g>
+      <g transform="translate(320 310)"><line x1="0" y1="0" x2="0" y2="-110"/><circle cx="0" cy="-110" r="3.5" fill="#fff"/><line x1="0" y1="-110" x2="34" y2="-135"/><line x1="0" y1="-110" x2="-34" y2="-135"/><line x1="0" y1="-110" x2="0" y2="-75"/></g>
+    </g>
+  </svg>`,
+
+  offshore: `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky2" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffdcc4"/><stop offset=".5" stop-color="#f6b39a"/><stop offset="1" stop-color="#5b7e95"/></linearGradient>
+      <linearGradient id="sea2" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3b5a73"/><stop offset="1" stop-color="#0d2436"/></linearGradient>
+    </defs>
+    <rect width="400" height="300" fill="url(#sky2)"/>
+    <circle cx="80" cy="190" r="38" fill="#ffe4a1"/>
+    <rect y="290" width="400" height="220" fill="url(#sea2)"/>
+    <g fill="#fff" opacity=".25"><path d="M0 320 Q100 312 200 320 T400 320 L400 332 L0 332 Z"/><path d="M0 360 Q100 352 200 360 T400 360 L400 372 L0 372 Z"/><path d="M0 420 Q100 412 200 420 T400 420 L400 432 L0 432 Z"/></g>
+    <g stroke="#1a2d3d" stroke-width="3" stroke-linecap="round" fill="none">
+      <g transform="translate(120 290)"><line x1="0" y1="0" x2="0" y2="-150"/><circle cx="0" cy="-150" r="5" fill="#1a2d3d"/><line x1="0" y1="-150" x2="46" y2="-180"/><line x1="0" y1="-150" x2="-46" y2="-180"/><line x1="0" y1="-150" x2="0" y2="-100"/></g>
+      <g transform="translate(230 295)"><line x1="0" y1="0" x2="0" y2="-180"/><circle cx="0" cy="-180" r="6" fill="#1a2d3d"/><line x1="0" y1="-180" x2="55" y2="-215"/><line x1="0" y1="-180" x2="-55" y2="-215"/><line x1="0" y1="-180" x2="0" y2="-125"/></g>
+      <g transform="translate(330 292)"><line x1="0" y1="0" x2="0" y2="-130"/><circle cx="0" cy="-130" r="4" fill="#1a2d3d"/><line x1="0" y1="-130" x2="40" y2="-158"/><line x1="0" y1="-130" x2="-40" y2="-158"/><line x1="0" y1="-130" x2="0" y2="-90"/></g>
+    </g>
+  </svg>`,
+
+  homeSolar: `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky3" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fde8c4"/><stop offset="1" stop-color="#a7c1d4"/></linearGradient>
+    </defs>
+    <rect width="400" height="500" fill="url(#sky3)"/>
+    <circle cx="320" cy="110" r="55" fill="#ffcf6b" opacity=".85"/>
+    <path d="M0 380 Q200 350 400 380 L400 500 L0 500 Z" fill="#7d9683"/>
+    <!-- house -->
+    <g transform="translate(110 240)">
+      <polygon points="0,80 90,0 180,80" fill="#e6dfd2"/>
+      <rect x="10" y="80" width="160" height="120" fill="#f4ede0"/>
+      <rect x="70" y="130" width="40" height="70" fill="#3b5a73"/>
+      <rect x="25" y="100" width="30" height="25" fill="#a7c1d4"/>
+      <rect x="125" y="100" width="30" height="25" fill="#a7c1d4"/>
+      <!-- solar panels -->
+      <g transform="translate(20 35) rotate(-42)" stroke="#001a2c" stroke-width="1.5">
+        <rect width="80" height="42" fill="#1d3b54"/>
+        <line x1="0" y1="14" x2="80" y2="14" stroke="#3b5a73"/><line x1="0" y1="28" x2="80" y2="28" stroke="#3b5a73"/>
+        <line x1="20" y1="0" x2="20" y2="42" stroke="#3b5a73"/><line x1="40" y1="0" x2="40" y2="42" stroke="#3b5a73"/><line x1="60" y1="0" x2="60" y2="42" stroke="#3b5a73"/>
+      </g>
+    </g>
+  </svg>`,
+
+  solarField: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="sg1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fde2c2"/><stop offset="1" stop-color="#a7c1d4"/></linearGradient></defs>
+    <rect width="400" height="180" fill="url(#sg1)"/>
+    <circle cx="60" cy="60" r="30" fill="#ffd278"/>
+    <rect y="170" width="400" height="130" fill="#7d9683"/>
+    <g fill="#1d3b54" stroke="#3b5a73" stroke-width="1">
+      <g transform="translate(30 200) skewX(-20)"><rect width="80" height="36"/><line x1="0" y1="12" x2="80" y2="12" stroke="#3b5a73"/><line x1="0" y1="24" x2="80" y2="24" stroke="#3b5a73"/></g>
+      <g transform="translate(140 210) skewX(-20)"><rect width="80" height="36"/><line x1="0" y1="12" x2="80" y2="12" stroke="#3b5a73"/><line x1="0" y1="24" x2="80" y2="24" stroke="#3b5a73"/></g>
+      <g transform="translate(250 220) skewX(-20)"><rect width="80" height="36"/><line x1="0" y1="12" x2="80" y2="12" stroke="#3b5a73"/><line x1="0" y1="24" x2="80" y2="24" stroke="#3b5a73"/></g>
+    </g>
+  </svg>`,
+
+  onshoreWind: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="wg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dbe6ee"/><stop offset="1" stop-color="#9eb7c8"/></linearGradient></defs>
+    <rect width="400" height="200" fill="url(#wg)"/>
+    <path d="M0 200 Q200 170 400 200 L400 300 L0 300 Z" fill="#7d9683"/>
+    <g stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none">
+      <g transform="translate(120 200)"><line y2="-90"/><circle cy="-90" r="3" fill="#fff"/><line y1="-90" x2="30" y2="-110"/><line y1="-90" x2="-30" y2="-110"/><line y1="-90" y2="-60"/></g>
+      <g transform="translate(220 210)"><line y2="-110"/><circle cy="-110" r="4" fill="#fff"/><line y1="-110" x2="36" y2="-132"/><line y1="-110" x2="-36" y2="-132"/><line y1="-110" y2="-75"/></g>
+      <g transform="translate(310 205)"><line y2="-80"/><circle cy="-80" r="3" fill="#fff"/><line y1="-80" x2="26" y2="-98"/><line y1="-80" x2="-26" y2="-98"/><line y1="-80" y2="-55"/></g>
+    </g>
+  </svg>`,
+
+  community: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffd5b0"/><stop offset="1" stop-color="#e08d6b"/></linearGradient></defs>
+    <rect width="400" height="300" fill="url(#cg)"/>
+    <circle cx="200" cy="120" r="50" fill="#ffe6c4" opacity=".6"/>
+    <g fill="#002b3d">
+      <circle cx="120" cy="170" r="22"/><rect x="100" y="195" width="44" height="60" rx="6"/>
+      <circle cx="200" cy="160" r="26"/><rect x="176" y="190" width="50" height="70" rx="6"/>
+      <circle cx="280" cy="172" r="22"/><rect x="260" y="197" width="44" height="58" rx="6"/>
+    </g>
+  </svg>`,
+
+  hardhat: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="hg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8aa6ba"/><stop offset="1" stop-color="#002b3d"/></linearGradient></defs>
+    <rect width="400" height="300" fill="url(#hg)"/>
+    <g fill="#f4ede0">
+      <circle cx="200" cy="125" r="48"/>
+      <path d="M150 110 Q200 70 250 110 L260 130 L140 130 Z" fill="#ffc72c"/>
+      <rect x="190" y="105" width="20" height="6" fill="#ffc72c" stroke="#001a2c" stroke-width="2"/>
+      <rect x="155" y="180" width="90" height="120" rx="10" fill="#ff7a59"/>
+    </g>
+  </svg>`,
+
+  cargo: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="cg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#dbe6ee"/><stop offset="1" stop-color="#5b7e95"/></linearGradient></defs>
+    <rect width="400" height="180" fill="url(#cg2)"/>
+    <rect y="170" width="400" height="130" fill="#1d3b54"/>
+    <g fill="#fff" opacity=".25"><path d="M0 195 Q100 187 200 195 T400 195 L400 205 L0 205 Z"/><path d="M0 230 Q100 222 200 230 T400 230 L400 240 L0 240 Z"/></g>
+    <!-- crane ship -->
+    <g transform="translate(80 130)">
+      <rect width="220" height="40" y="40" fill="#001a2c"/>
+      <rect x="20" y="20" width="40" height="20" fill="#ff7a59"/>
+      <rect x="80" y="20" width="40" height="20" fill="#ffc72c"/>
+      <rect x="140" y="20" width="40" height="20" fill="#e6dfd2"/>
+      <line x1="60" y1="-30" x2="60" y2="20" stroke="#001a2c" stroke-width="3"/>
+      <line x1="60" y1="-30" x2="130" y2="-30" stroke="#001a2c" stroke-width="3"/>
+    </g>
+  </svg>`,
+
+  blueprint: `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#1d3b54"/>
+    <g stroke="#a7c1d4" stroke-width="1" fill="none" opacity=".5">
+      ${Array.from({length: 16}, (_, i) => `<line x1="${i*25}" y1="0" x2="${i*25}" y2="300"/>`).join('')}
+      ${Array.from({length: 12}, (_, i) => `<line x1="0" y1="${i*25}" x2="400" y2="${i*25}"/>`).join('')}
+    </g>
+    <g stroke="#ffc72c" stroke-width="2" fill="none">
+      <circle cx="120" cy="150" r="50"/>
+      <line x1="120" y1="100" x2="120" y2="200"/><line x1="70" y1="150" x2="170" y2="150"/>
+      <rect x="240" y="100" width="100" height="100"/>
+      <line x1="240" y1="100" x2="340" y2="200"/><line x1="340" y1="100" x2="240" y2="200"/>
+    </g>
+  </svg>`,
+};
+
+const VARIANTS = {
+  hero: [
+    {
+      label: '"Love your home"',
+      slots: {
+        'hero-eyebrow': 'For a world that runs entirely on green energy',
+        'hero-headline': 'Love your home. Power it with clean energy.',
+        'hero-lede': 'Switch to a clean energy plan with Ørsted and make a real impact in your community — without lifting more than a finger.',
+        'hero-cta-1': 'Find a plan',
+        'hero-cta-2': 'How it works',
+        'hero-visual': SVG.homeSolar,
+      },
+    },
+    {
+      label: '"Future starts here"',
+      slots: {
+        'hero-eyebrow': 'Offshore · Onshore · Solar · Storage',
+        'hero-headline': "America's clean energy future starts here.",
+        'hero-lede': "We're building the offshore wind farms, onshore wind, and solar projects that will power the next generation of American homes and industries.",
+        'hero-cta-1': 'Explore our projects',
+        'hero-cta-2': 'Watch the film',
+        'hero-visual': SVG.offshore,
+      },
+    },
+    {
+      label: '"Green by default"',
+      slots: {
+        'hero-eyebrow': 'Real power. Real progress.',
+        'hero-headline': 'Green by default. Powered by you.',
+        'hero-lede': 'Every electron we deliver comes from the wind, the sun, or the sea. Choose energy that gives more than it takes.',
+        'hero-cta-1': 'Get started',
+        'hero-cta-2': 'See our impact',
+        'hero-visual': SVG.windField,
+      },
+    },
+  ],
+
+  threeup: [
+    {
+      label: 'By technology',
+      slots: {
+        'threeup-eyebrow': 'What we do',
+        'threeup-headline': 'Building the clean energy backbone of America.',
+        'threeup-lede': 'From offshore wind off the East Coast to solar across the heartland, we develop, build, and operate at scale — for the long haul.',
+        'threeup-grid': {
+          type: 'cards',
+          items: [
+            { eyebrow: 'Offshore Wind', title: 'America\'s first offshore farms', body: 'South Fork, Revolution Wind, and Sunrise Wind — powering hundreds of thousands of New England homes.', link: 'Learn about offshore', art: SVG.offshore },
+            { eyebrow: 'Onshore Wind', title: '8 GW of wind across 13 states', body: 'From Texas to South Dakota, our onshore wind farms produce reliable clean power, every day.', link: 'See our wind farms', art: SVG.onshoreWind },
+            { eyebrow: 'Solar & Storage', title: 'The sun, after sundown', body: 'Utility-scale solar paired with storage — keeping the lights on long after the panels go quiet.', link: 'Explore solar', art: SVG.solarField },
+          ],
+        },
+      },
+    },
+    {
+      label: 'Customer stories',
+      slots: {
+        'threeup-eyebrow': 'Real impact',
+        'threeup-headline': 'Energy that means something to the people it powers.',
+        'threeup-lede': "It's not just megawatts. It's the small business owner cutting costs. The school running on the wind. The town that decided its future.",
+        'threeup-grid': {
+          type: 'cards',
+          items: [
+            { eyebrow: 'Customer · NY', title: '"Our community asked for it."', body: 'How Suffolk County partnered with Ørsted on a 130 MW offshore project — and what it changed.', link: 'Read the story', art: SVG.community },
+            { eyebrow: 'Customer · TX', title: '"Wind paid for our roof."', body: 'Rancher Maria Salazar leased 40 acres and used the lease to renovate the family home.', link: 'Read the story', art: SVG.onshoreWind },
+            { eyebrow: 'Customer · RI', title: '"Cheaper. And cleaner."', body: 'A Providence school district swapped suppliers and cut energy costs by 18% in year one.', link: 'Read the story', art: SVG.homeSolar },
+          ],
+        },
+      },
+    },
+    {
+      label: 'By the numbers',
+      slots: {
+        'threeup-eyebrow': 'Our scale',
+        'threeup-headline': 'A track record measured in gigawatts, not pledges.',
+        'threeup-lede': "Ørsted is the world's largest developer of offshore wind, and one of the largest builders of onshore renewables in the U.S. — and we're just getting going.",
+        'threeup-grid': {
+          type: 'stats',
+          items: [
+            { num: '15 GW', label: 'Renewable capacity built worldwide — enough to power roughly 17M homes.' },
+            { num: '9M+', label: 'American homes already supplied with clean energy from Ørsted projects.' },
+            { num: '8,000', label: 'Jobs supported across construction, operations, and the U.S. supply chain.' },
+          ],
+        },
+      },
+    },
+  ],
+
+  statement: [
+    {
+      label: 'Net-zero',
+      slots: {
+        'statement-eyebrow': 'Our commitment',
+        'statement-headline': 'Net-zero by 2040. No offsets, no excuses.',
+        'statement-lede': "We don't talk about climate ambition — we run on a science-based plan. Already 90% renewable. Coal-free since 2023.",
+        'statement-cta': 'Read our climate plan',
+      },
+    },
+    {
+      label: 'Long-term',
+      slots: {
+        'statement-eyebrow': 'Built to last',
+        'statement-headline': 'Built for generations, not quarters.',
+        'statement-lede': 'Offshore wind farms run for 30+ years. We invest, build, and operate on the same timeline as the people who depend on us.',
+        'statement-cta': 'How we operate',
+      },
+    },
+    {
+      label: 'Local impact',
+      slots: {
+        'statement-eyebrow': 'In your backyard',
+        'statement-headline': 'Climate action, made local.',
+        'statement-lede': "Our projects spend with American suppliers, hire union labor, and pay community benefits that stay in the towns that host them.",
+        'statement-cta': 'See community impact',
+      },
+    },
+  ],
+
+  news: [
+    {
+      label: 'Press releases',
+      slots: {
+        'news-eyebrow': 'Newsroom',
+        'news-headline': 'Latest from Ørsted',
+        'news-cta': 'See all news',
+        'news-grid': {
+          items: [
+            { tag: 'Press release', date: 'May 4, 2026', title: 'Revolution Wind delivers first power to Rhode Island grid', art: SVG.offshore },
+            { tag: 'Press release', date: 'Apr 22, 2026', title: 'Ørsted to expand Texas solar portfolio with 480 MW project', art: SVG.solarField },
+            { tag: 'Press release', date: 'Apr 10, 2026', title: 'Q1 results: clean energy investments up 22% year-on-year', art: SVG.blueprint },
+          ],
+        },
+      },
+    },
+    {
+      label: 'Reports & insight',
+      slots: {
+        'news-eyebrow': 'Insight',
+        'news-headline': 'Reports, research, and the long view',
+        'news-cta': 'Browse our library',
+        'news-grid': {
+          items: [
+            { tag: 'Report · 48 pages', date: '2026', title: 'The U.S. offshore wind opportunity: a 2030 outlook', art: SVG.blueprint },
+            { tag: 'Whitepaper', date: '2026', title: 'Grid-scale storage: economics, deployment, and what blocks faster build-out', art: SVG.cargo },
+            { tag: 'Sustainability', date: '2025', title: "Ørsted's climate transition plan — annual progress update", art: SVG.windField },
+          ],
+        },
+      },
+    },
+    {
+      label: 'Customer stories',
+      slots: {
+        'news-eyebrow': 'Stories',
+        'news-headline': 'The people behind the megawatts',
+        'news-cta': 'Read more stories',
+        'news-grid': {
+          items: [
+            { tag: 'Story · 6 min read', date: 'May 2026', title: 'Inside the New London port that\'s building America\'s offshore future', art: SVG.cargo },
+            { tag: 'Story · 8 min read', date: 'Apr 2026', title: "How one Iowa town doubled its school budget — with wind royalties", art: SVG.community },
+            { tag: 'Story · 5 min read', date: 'Mar 2026', title: 'Meet the offshore technicians 12 miles out at sea', art: SVG.hardhat },
+          ],
+        },
+      },
+    },
+  ],
+
+  careers: [
+    {
+      label: 'Build your career',
+      slots: {
+        'careers-eyebrow': 'Careers',
+        'careers-headline': 'Build your career in clean energy.',
+        'careers-lede': 'Join the team building the offshore wind, onshore wind, and solar projects that power millions of American homes.',
+        'careers-cta': 'See open roles',
+        'careers-visual': SVG.hardhat,
+      },
+    },
+    {
+      label: 'Honest pitch',
+      slots: {
+        'careers-eyebrow': 'Working here',
+        'careers-headline': 'We hire people who give a damn.',
+        'careers-lede': "The work is hard, the timelines are real, and the stakes are about as serious as work gets. If that sounds good — let's talk.",
+        'careers-cta': 'Meet the team',
+        'careers-visual': SVG.community,
+      },
+    },
+    {
+      label: 'Data-driven',
+      slots: {
+        'careers-eyebrow': 'Now hiring',
+        'careers-headline': '124 open roles. Are you next?',
+        'careers-lede': 'Engineering, project management, operations, commercial, finance — across offices in Boston, Providence, Houston, and remote.',
+        'careers-cta': 'Browse all 124 roles',
+        'careers-visual': SVG.blueprint,
+      },
+    },
+  ],
+
+  footercta: [
+    {
+      label: 'Newsletter',
+      slots: {
+        'footercta-eyebrow': 'Stay in the loop',
+        'footercta-headline': 'Clean energy news, every two weeks.',
+        'footercta-lede': 'Project updates, climate insight, and the occasional good news story. No spam — ever.',
+        'footercta-action': { type: 'signup', placeholder: 'you@email.com', button: 'Subscribe' },
+        'footercta-points': ['Bi-weekly digest', 'Curated by our editors', 'Unsubscribe anytime'],
+      },
+    },
+    {
+      label: 'Talk to sales',
+      slots: {
+        'footercta-eyebrow': 'Power your business',
+        'footercta-headline': 'Switch your company to clean energy.',
+        'footercta-lede': 'Talk to our commercial team about Power Purchase Agreements, on-site solar, and renewable energy certificates.',
+        'footercta-action': { type: 'buttons', primary: 'Schedule a call', secondary: 'Get a quote' },
+        'footercta-points': ['Dedicated account team', 'Custom PPA structures', 'Certified renewable supply'],
+      },
+    },
+    {
+      label: 'Partner',
+      slots: {
+        'footercta-eyebrow': 'Partner with us',
+        'footercta-headline': 'Build the next decade of clean energy together.',
+        'footercta-lede': 'Local suppliers, port operators, landowners, and EPC contractors — Ørsted partners with the businesses that make our projects possible.',
+        'footercta-action': { type: 'buttons', primary: 'Become a supplier', secondary: 'Landowner inquiries' },
+        'footercta-points': ['$5B+ U.S. supply chain spend', 'Open RFP portal', '120+ active partners'],
+      },
+    },
+  ],
+};
+
+const SECTION_ORDER = [
+  { key: 'hero',      label: 'Hero' },
+  { key: 'threeup',   label: 'What we do' },
+  { key: 'statement', label: 'Commitment' },
+  { key: 'news',      label: 'News / Insight' },
+  { key: 'careers',   label: 'Careers' },
+  { key: 'footercta', label: 'Footer CTA' },
+];
+
+// ============================================================
+//  Apply variant -> DOM
+// ============================================================
+
+function setSlot(sectionKey, slotName, value) {
+  const el = document.querySelector(`[data-section="${sectionKey}"] [data-slot="${slotName}"]`);
+  if (!el) return;
+
+  // Special slots that take structured data
+  if (slotName === 'hero-visual' || slotName === 'careers-visual') {
+    el.innerHTML = value;
+    return;
+  }
+  if (slotName === 'threeup-grid') {
+    renderThreeUpGrid(el, value);
+    return;
+  }
+  if (slotName === 'news-grid') {
+    renderNewsGrid(el, value);
+    return;
+  }
+  if (slotName === 'footercta-action') {
+    renderFooterCtaAction(el, value);
+    return;
+  }
+  if (slotName === 'footercta-points') {
+    el.innerHTML = value.map(p => `<li>${escapeHTML(p)}</li>`).join('');
+    return;
+  }
+
+  el.textContent = value;
+}
+
+function renderThreeUpGrid(host, data) {
+  if (data.type === 'cards') {
+    host.className = 'cards';
+    host.innerHTML = data.items.map(item => `
+      <article class="card">
+        <div class="card-art">${item.art}</div>
+        <div class="card-body">
+          <div class="card-eyebrow">${escapeHTML(item.eyebrow)}</div>
+          <h3>${escapeHTML(item.title)}</h3>
+          <p style="opacity:.78">${escapeHTML(item.body)}</p>
+          <a class="card-link" href="#">${escapeHTML(item.link)} <span class="arrow">→</span></a>
+        </div>
+      </article>
+    `).join('');
+  } else {
+    host.className = 'stats';
+    host.innerHTML = data.items.map(item => `
+      <div class="stat">
+        <div class="num">${escapeHTML(item.num)}</div>
+        <div class="label">${escapeHTML(item.label)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function renderNewsGrid(host, data) {
+  host.className = 'cards';
+  host.innerHTML = data.items.map(item => `
+    <article class="card">
+      <div class="card-art thin">${item.art}</div>
+      <div class="card-body">
+        <div class="card-eyebrow">${escapeHTML(item.tag)} · ${escapeHTML(item.date)}</div>
+        <h3>${escapeHTML(item.title)}</h3>
+        <a class="card-link" href="#">Read more <span class="arrow">→</span></a>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderFooterCtaAction(host, data) {
+  if (data.type === 'signup') {
+    host.innerHTML = `
+      <form class="signup" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Thanks!';">
+        <input type="email" placeholder="${escapeAttr(data.placeholder)}" required />
+        <button class="btn btn-primary" type="submit">${escapeHTML(data.button)}</button>
+      </form>
+    `;
+  } else {
+    host.innerHTML = `
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-primary" href="#">${escapeHTML(data.primary)} <span class="arrow">→</span></a>
+        <a class="btn btn-ghost" href="#">${escapeHTML(data.secondary)}</a>
+      </div>
+    `;
+  }
+}
+
+function applyVariant(sectionKey, index) {
+  const variant = VARIANTS[sectionKey][index];
+  if (!variant) return;
+  for (const [slotName, value] of Object.entries(variant.slots)) {
+    setSlot(sectionKey, slotName, value);
+  }
+}
+
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function escapeAttr(s) { return escapeHTML(s); }
+
+// ============================================================
+//  State + control panel
+// ============================================================
+
+const STORAGE_KEY = 'orsted-mockup-variants-v1';
+const state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...defaultState(), ...JSON.parse(raw) };
+  } catch (e) {}
+  return defaultState();
+}
+function defaultState() {
+  const s = {};
+  SECTION_ORDER.forEach(({ key }) => s[key] = 0);
+  return s;
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function setVariant(sectionKey, index) {
+  state[sectionKey] = index;
+  saveState();
+  applyVariant(sectionKey, index);
+  renderControlPanel();
+}
+
+function renderControlPanel() {
+  const body = document.getElementById('switcher-body');
+  body.innerHTML = SECTION_ORDER.map(({ key, label }) => {
+    const current = state[key];
+    const previewLabel = VARIANTS[key][current].label;
+    const pills = VARIANTS[key].map((v, i) =>
+      `<button class="pill ${i === current ? 'active' : ''}" data-section="${key}" data-index="${i}" title="${escapeAttr(v.label)}">${i + 1}</button>`
+    ).join('');
+    return `
+      <div class="switcher-row">
+        <div class="row-label">
+          <span>${escapeHTML(label)}</span>
+          <span class="preview">${escapeHTML(previewLabel)}</span>
+        </div>
+        <div class="pill-group">${pills}</div>
+      </div>
+    `;
+  }).join('') + `
+    <div class="switcher-foot">
+      <button id="btn-randomize">🎲 Randomize</button>
+      <button id="btn-reset">↺ Reset</button>
+    </div>
+  `;
+
+  body.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      setVariant(p.dataset.section, parseInt(p.dataset.index, 10));
+    });
+  });
+  document.getElementById('btn-randomize').addEventListener('click', randomize);
+  document.getElementById('btn-reset').addEventListener('click', reset);
+}
+
+function randomize() {
+  SECTION_ORDER.forEach(({ key }) => {
+    state[key] = Math.floor(Math.random() * VARIANTS[key].length);
+  });
+  saveState();
+  applyAll();
+  renderControlPanel();
+}
+function reset() {
+  SECTION_ORDER.forEach(({ key }) => state[key] = 0);
+  saveState();
+  applyAll();
+  renderControlPanel();
+}
+
+function applyAll() {
+  SECTION_ORDER.forEach(({ key }) => applyVariant(key, state[key]));
+}
+
+// Collapse toggle
+document.getElementById('switcher-head').addEventListener('click', (e) => {
+  if (e.target.tagName === 'BUTTON' && e.target.id !== 'switcher-toggle') return;
+  document.getElementById('switcher').classList.toggle('collapsed');
+  const t = document.getElementById('switcher-toggle');
+  t.textContent = document.getElementById('switcher').classList.contains('collapsed') ? '+' : '–';
+});
+
+// Boot
+applyAll();
+renderControlPanel();
+</script>
+</body>
+</html>
