@@ -1,24 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { jsonError } from "@/lib/api-helpers";
-
-function csvField(v: string | number | null | undefined): string {
-  if (v === null || v === undefined) return "";
-  const s = String(v);
-  if (/[",\n\r]/.test(s)) {
-    return `"${s.replace(/"/g, '""')}"`;
-  }
-  return s;
-}
-
-function dollars(cents: number): string {
-  return (cents / 100).toFixed(2);
-}
-
-function ymd(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate(),
-  ).padStart(2, "0")}`;
-}
+import { csvField, dollars, ymd } from "@/lib/csv";
 
 export async function GET() {
   try {

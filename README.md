@@ -56,6 +56,24 @@ categories are seeded lazily on the first `/api/categories` request.
 5. Open the deployed URL on your phone, enter the three housemates' names,
    and you're done.
 
+## Weekly snapshots
+
+Every Sunday night a Vercel Cron job hits `/api/cron/weekly-snapshot`, which
+writes a CSV report to Vercel Blob under `snapshots/week-ending-YYYY-MM-DD.csv`.
+Each report contains this week's new expenses, the simplified who-owes-who
+settle-up, and all-time net balances. Download past snapshots from
+**Settings → Weekly snapshots** (or generate one on demand there).
+
+- **Schedule** lives in `vercel.json`. Vercel Cron fires in **UTC**, so the
+  time is set to `59 3 * * 1` (Monday 03:59 UTC ≈ Sunday 23:59 US Eastern). If
+  your household isn't on Eastern time, change both this schedule and
+  `APP_TIMEZONE` to match. `APP_TIMEZONE` (an IANA zone, default
+  `America/New_York`) is what defines the Mon–Sun week boundaries.
+- **`CRON_SECRET`** — set this in the Vercel project. Vercel sends it as a
+  Bearer token and the endpoint rejects requests without it.
+- Note: on the Vercel **Hobby** plan cron runs are limited to once per day and
+  fire approximately (not to the exact minute); upgrade to Pro for precise timing.
+
 ## Future
 
 - `v2`: PWA install, activity log, recurring expenses, monthly summary, dark mode.

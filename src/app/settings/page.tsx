@@ -15,6 +15,13 @@ type RentConfig = {
   defaultPayerId: string | null;
 };
 
+type Snapshot = {
+  url: string;
+  pathname: string;
+  size: number;
+  uploadedAt: string;
+};
+
 export default function SettingsPage() {
   const [currentId, setCurrentId] = useCurrentUserId();
   const [users, setUsers] = useState<User[]>([]);
@@ -24,6 +31,10 @@ export default function SettingsPage() {
   const [newCategory, setNewCategory] = useState("");
   const [newIcon, setNewIcon] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [snapBusy, setSnapBusy] = useState(false);
+  const [snapStatus, setSnapStatus] = useState<string | null>(null);
 
   const [rent, setRent] = useState<RentConfig | null>(null);
   const [rentTotalInput, setRentTotalInput] = useState("");
@@ -59,6 +70,29 @@ export default function SettingsPage() {
   };
 
   useEffect(refresh, []);
+
+  const loadSnapshots = () => {
+    api
+      .get<Snapshot[]>("/api/snapshots")
+      .then(setSnapshots)
+      .catch(() => setSnapshots([]));
+  };
+
+  useEffect(loadSnapshots, []);
+
+  const generateSnapshot = async () => {
+    setSnapStatus(null);
+    setSnapBusy(true);
+    try {
+      await api.post("/api/snapshots", {});
+      setSnapStatus("Snapshot created.");
+      loadSnapshots();
+    } catch (e) {
+      setSnapStatus(e instanceof Error ? e.message : "Failed to create snapshot.");
+    } finally {
+      setSnapBusy(false);
+    }
+  };
 
   const startEdit = (u: User) => {
     setEditingId(u.id);
@@ -374,6 +408,72 @@ export default function SettingsPage() {
         >
           Download CSV
         </a>
+      </section>
+
+      <section className="card p-5">
+        <h2 className="mb-1 text-lg font-semibold">Weekly snapshots</h2>
+        <p className="mb-3 text-sm text-neutral-600">
+          Every Sunday night an automatic snapshot is saved here: this week&apos;s
+          new expenses plus the full who-owes-who balances. Download any week as a
+          CSV.
+        </p>
+
+        {snapshots.length === 0 ? (
+          <p className="mb-3 text-sm text-neutral-500">
+            No snapshots yet. The first one is created next Sunday — or make one
+            now.
+          </p>
+        ) : (
+          <ul className="mb-3 divide-y divide-neutral-100">
+            {snapshots.map((s) => {
+              const name = s.pathname.split("/").pop() ?? s.pathname;
+              const when = s.uploadedAt ? s.uploadedAt.slice(0, 10) : "";
+              return (
+                <li
+                  key={s.pathname}
+                  className="flex items-center justify-between gap-3 py-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{name}</p>
+                    {when && (
+                      <p className="text-xs text-neutral-500">Saved {when}</p>
+                    )}
+                  </div>
+                  <a
+                    className="btn-ghost shrink-0"
+                    href={s.url}
+                    download={name}
+                  >
+                    Download
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={generateSnapshot}
+            disabled={snapBusy}
+          >
+            {snapBusy ? "Creating…" : "Generate this week's snapshot now"}
+          </button>
+          {snapStatus && (
+            <span
+              className={clsx(
+                "text-sm",
+                snapStatus === "Snapshot created."
+                  ? "text-green-600"
+                  : "text-red-600",
+              )}
+            >
+              {snapStatus}
+            </span>
+          )}
+        </div>
       </section>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
