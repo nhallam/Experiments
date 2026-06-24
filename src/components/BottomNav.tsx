@@ -41,7 +41,7 @@ export function BottomNav() {
   );
 
   return (
-    <nav className="fixed bottom-3 left-3 right-3 z-40 mx-auto flex max-w-xl items-stretch justify-between rounded-2xl border border-neutral-200 bg-white shadow-lg">
+    <nav className="fixed bottom-3 left-3 right-3 z-40 mx-auto flex max-w-xl items-stretch justify-between rounded-2xl bg-neutral-900 shadow-lg">
       {ITEMS.map((item) => {
         const active = item.href === activeHref;
         const Icon = item.icon;
@@ -51,7 +51,7 @@ export function BottomNav() {
             href={item.href}
             className={clsx(
               "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition-colors",
-              active ? "text-brand-dark" : "text-neutral-500",
+              active ? "text-white" : "text-neutral-400 hover:text-neutral-200",
             )}
           >
             <Icon size={22} />
