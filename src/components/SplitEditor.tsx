@@ -1,6 +1,12 @@
 "use client";
 
-import clsx from "clsx";
+import {
+  SegmentedControl,
+  SegmentedControlItem,
+} from "@astryxdesign/core/SegmentedControl";
+import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { NumberInput } from "@astryxdesign/core/NumberInput";
+import { FieldStatus } from "@astryxdesign/core/FieldStatus";
 import { splitEqual, splitByWeights, toCents, formatMoney } from "@/lib/money";
 import type { User } from "@/types";
 
@@ -97,6 +103,13 @@ type Props = {
   totalCents: number;
 };
 
+/** Parse a string field into NumberInput's number|null model. */
+function toNumberValue(s: string): number | null {
+  if (s === "") return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
 export function SplitEditor({
   users,
   mode,
@@ -122,21 +135,15 @@ export function SplitEditor({
 
   return (
     <div className="space-y-3">
-      <div>
-        <span className="label">Split</span>
-        <div className="flex flex-wrap gap-2">
-          {modes.map((m) => (
-            <button
-              key={m.key}
-              type="button"
-              className={clsx("chip", mode === m.key && "chip-active")}
-              onClick={() => onModeChange(m.key)}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <SegmentedControl
+        label="Split"
+        value={mode}
+        onChange={(v) => onModeChange(v as SplitMode)}
+      >
+        {modes.map((m) => (
+          <SegmentedControlItem key={m.key} value={m.key} label={m.label} />
+        ))}
+      </SegmentedControl>
 
       <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-200 bg-white">
         {users.map((u) => {
@@ -145,52 +152,58 @@ export function SplitEditor({
           const shareCents = shares[u.id];
           return (
             <li key={u.id} className="flex items-center gap-3 p-3">
-              <input
-                type="checkbox"
-                checked={p.included}
-                onChange={(e) => updateParticipant(u.id, { included: e.target.checked })}
-                className="h-5 w-5"
+              <CheckboxInput
+                label={u.name}
+                isLabelHidden
+                value={p.included}
+                onChange={(checked) => updateParticipant(u.id, { included: checked })}
               />
               <span className="flex-1 font-medium">{u.name}</span>
 
               {mode === "exact" && p.included && (
-                <div className="flex items-center gap-1">
-                  <span className="text-neutral-500">$</span>
-                  <input
-                    className="input w-24 py-1"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    inputMode="decimal"
-                    value={p.exact}
-                    onChange={(e) => updateParticipant(u.id, { exact: e.target.value })}
-                  />
-                </div>
+                <NumberInput
+                  label={`${u.name} exact amount`}
+                  isLabelHidden
+                  hasClear
+                  min={0}
+                  step={0.01}
+                  units="$"
+                  width={96}
+                  value={toNumberValue(p.exact)}
+                  onChange={(v) =>
+                    updateParticipant(u.id, { exact: v === null ? "" : String(v) })
+                  }
+                />
               )}
               {mode === "percent" && p.included && (
-                <div className="flex items-center gap-1">
-                  <input
-                    className="input w-20 py-1"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    inputMode="decimal"
-                    value={p.percent}
-                    onChange={(e) => updateParticipant(u.id, { percent: e.target.value })}
-                  />
-                  <span className="text-neutral-500">%</span>
-                </div>
+                <NumberInput
+                  label={`${u.name} percent`}
+                  isLabelHidden
+                  hasClear
+                  min={0}
+                  max={100}
+                  step={0.01}
+                  units="%"
+                  width={88}
+                  value={toNumberValue(p.percent)}
+                  onChange={(v) =>
+                    updateParticipant(u.id, { percent: v === null ? "" : String(v) })
+                  }
+                />
               )}
               {mode === "shares" && p.included && (
-                <input
-                  className="input w-20 py-1"
-                  type="number"
-                  step="1"
-                  min="0"
-                  inputMode="numeric"
-                  value={p.shares}
-                  onChange={(e) => updateParticipant(u.id, { shares: e.target.value })}
+                <NumberInput
+                  label={`${u.name} shares`}
+                  isLabelHidden
+                  hasClear
+                  isIntegerOnly
+                  min={0}
+                  step={1}
+                  width={80}
+                  value={toNumberValue(p.shares)}
+                  onChange={(v) =>
+                    updateParticipant(u.id, { shares: v === null ? "" : String(v) })
+                  }
                 />
               )}
 
@@ -203,9 +216,9 @@ export function SplitEditor({
       </ul>
 
       {error ? (
-        <p className="text-sm text-red-600">{error}</p>
+        <FieldStatus type="error" message={error} />
       ) : (
-        <p className="text-sm text-neutral-500">Shares add up correctly.</p>
+        <FieldStatus type="success" message="Shares add up correctly." />
       )}
     </div>
   );

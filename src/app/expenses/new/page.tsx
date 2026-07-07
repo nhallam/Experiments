@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@astryxdesign/core/Button";
 import { api } from "@/lib/api-client";
 import { ExpenseForm } from "@/components/ExpenseForm";
 import type { Category, User } from "@/types";
@@ -34,9 +35,7 @@ export default function NewExpensePage() {
     <main className="flex-1 p-4">
       <header className="mb-4 flex items-center justify-between pt-2">
         <h1 className="text-2xl font-semibold">New expense</h1>
-        <button className="btn-ghost" onClick={() => router.back()}>
-          Cancel
-        </button>
+        <Button label="Cancel" variant="ghost" onClick={() => router.back()} />
       </header>
 
       <ExpenseForm

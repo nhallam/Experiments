@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import clsx from "clsx";
+import { Button } from "@astryxdesign/core/Button";
+import { NumberInput } from "@astryxdesign/core/NumberInput";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { DateInput } from "@astryxdesign/core/DateInput";
+import { ToggleButton } from "@astryxdesign/core/ToggleButton";
+import { FieldStatus } from "@astryxdesign/core/FieldStatus";
+import type { ISODateString } from "@astryxdesign/core/Calendar";
 import { api } from "@/lib/api-client";
 import { useCurrentUserId } from "@/lib/identity";
 import { toCents } from "@/lib/money";
@@ -141,86 +147,66 @@ export function ExpenseForm({ users, categories, existing, onSaved, onCancel }: 
         submit();
       }}
     >
-      <div>
-        <label className="label">Amount</label>
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
-            $
-          </span>
-          <input
-            className="input pl-7 text-2xl"
-            type="number"
-            step="0.01"
-            min="0"
-            inputMode="decimal"
-            placeholder="0.00"
-            value={values.amount}
-            onChange={(e) => setValues((v) => ({ ...v, amount: e.target.value }))}
-            autoFocus={!existing}
-          />
-        </div>
-      </div>
+      <NumberInput
+        label="Amount"
+        hasClear
+        min={0}
+        step={0.01}
+        units="$"
+        placeholder="0.00"
+        hasAutoFocus={!existing}
+        value={values.amount === "" ? null : parseFloat(values.amount)}
+        onChange={(v) =>
+          setValues((val) => ({ ...val, amount: v === null ? "" : String(v) }))
+        }
+      />
 
       <div>
-        <label className="label">Paid by</label>
+        <span className="label">Paid by</span>
         <div className="flex flex-wrap gap-2">
           {users.map((u) => (
-            <button
+            <ToggleButton
               key={u.id}
-              type="button"
-              className={clsx("chip", values.payerId === u.id && "chip-active")}
-              onClick={() => setValues((v) => ({ ...v, payerId: u.id }))}
-            >
-              {u.name}
-            </button>
+              label={u.name}
+              isPressed={values.payerId === u.id}
+              onPressedChange={() => setValues((v) => ({ ...v, payerId: u.id }))}
+            />
           ))}
         </div>
       </div>
 
       <div>
-        <label className="label">Category</label>
+        <span className="label">Category</span>
         <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            className={clsx("chip", values.categoryId === null && "chip-active")}
-            onClick={() => setValues((v) => ({ ...v, categoryId: null }))}
-          >
-            None
-          </button>
+          <ToggleButton
+            label="None"
+            isPressed={values.categoryId === null}
+            onPressedChange={() => setValues((v) => ({ ...v, categoryId: null }))}
+          />
           {categories.map((c) => (
-            <button
+            <ToggleButton
               key={c.id}
-              type="button"
-              className={clsx("chip", values.categoryId === c.id && "chip-active")}
-              onClick={() => setValues((v) => ({ ...v, categoryId: c.id }))}
-            >
-              {c.icon ? `${c.icon} ` : ""}
-              {c.name}
-            </button>
+              label={c.name}
+              icon={c.icon ? <span>{c.icon}</span> : undefined}
+              isPressed={values.categoryId === c.id}
+              onPressedChange={() => setValues((v) => ({ ...v, categoryId: c.id }))}
+            />
           ))}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="label">Date</label>
-          <input
-            className="input"
-            type="date"
-            value={values.date}
-            onChange={(e) => setValues((v) => ({ ...v, date: e.target.value }))}
-          />
-        </div>
-        <div>
-          <label className="label">Note</label>
-          <input
-            className="input"
-            type="text"
-            placeholder="e.g. Tesco run"
-            value={values.note}
-            onChange={(e) => setValues((v) => ({ ...v, note: e.target.value }))}
-          />
-        </div>
+        <DateInput
+          label="Date"
+          value={values.date === "" ? undefined : (values.date as ISODateString)}
+          onChange={(v) => setValues((val) => ({ ...val, date: v ?? "" }))}
+        />
+        <TextInput
+          label="Note"
+          placeholder="e.g. Tesco run"
+          value={values.note}
+          onChange={(v) => setValues((val) => ({ ...val, note: v }))}
+        />
       </div>
 
       <SplitEditor
@@ -237,17 +223,24 @@ export function ExpenseForm({ users, categories, existing, onSaved, onCancel }: 
         onChange={(url) => setValues((v) => ({ ...v, receiptUrl: url }))}
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <FieldStatus type="error" message={error} />}
 
       <div className="flex gap-2">
         {onCancel && (
-          <button type="button" className="btn-ghost flex-1" onClick={onCancel}>
-            Cancel
-          </button>
+          <Button
+            label="Cancel"
+            variant="ghost"
+            onClick={onCancel}
+            className="flex-1"
+          />
         )}
-        <button type="submit" className="btn-primary flex-1" disabled={submitting}>
-          {submitting ? "Saving…" : existing ? "Save changes" : "Add expense"}
-        </button>
+        <Button
+          label={submitting ? "Saving…" : existing ? "Save changes" : "Add expense"}
+          variant="primary"
+          type="submit"
+          isDisabled={submitting}
+          className="flex-1"
+        />
       </div>
     </form>
   );

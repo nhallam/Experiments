@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { FileInput } from "@astryxdesign/core/FileInput";
+import { FieldStatus } from "@astryxdesign/core/FieldStatus";
 
 type Props = {
   value: string | null;
@@ -35,35 +38,33 @@ export function ReceiptUploader({ value, onChange }: Props) {
 
   return (
     <div>
-      <label className="label">Receipt (optional)</label>
       {value ? (
-        <div className="flex items-start gap-3">
-          {/* Plain img — receipts are Vercel Blob URLs; no need for Next/Image */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={value}
-            alt="Receipt"
-            className="h-24 w-24 rounded-lg border border-neutral-200 object-cover"
-          />
-          <button type="button" className="btn-ghost" onClick={() => onChange(null)}>
-            Remove
-          </button>
+        <div>
+          <span className="label">Receipt (optional)</span>
+          <div className="flex items-start gap-3">
+            {/* Plain img — receipts are Vercel Blob URLs; no need for Next/Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={value}
+              alt="Receipt"
+              className="h-24 w-24 rounded-lg border border-neutral-200 object-cover"
+            />
+            <Button label="Remove" variant="ghost" onClick={() => onChange(null)} />
+          </div>
         </div>
       ) : (
-        <label className="btn-secondary cursor-pointer w-full">
-          {uploading ? "Uploading…" : "Add photo"}
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) upload(f);
-            }}
-          />
-        </label>
+        <FileInput
+          label="Receipt (optional)"
+          accept="image/*"
+          value={null}
+          isLoading={uploading}
+          onChange={(files) => {
+            const f = Array.isArray(files) ? files[0] : files;
+            if (f) upload(f);
+          }}
+        />
       )}
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <FieldStatus type="error" message={error} />}
     </div>
   );
 }
