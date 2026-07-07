@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { AppBootstrap } from "@/components/AppBootstrap";
 import { InstallHint } from "@/components/InstallHint";
 import { DemoBanner } from "@/components/DemoBanner";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Splitty",
@@ -31,12 +32,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <DemoBanner />
-        <div className="mx-auto flex min-h-screen max-w-xl flex-col pb-24">
-          <AppBootstrap>{children}</AppBootstrap>
-        </div>
-        <BottomNav />
-        <InstallHint />
+        <Providers>
+          <DemoBanner />
+          <div className="mx-auto flex min-h-screen max-w-xl flex-col pb-24">
+            <AppBootstrap>{children}</AppBootstrap>
+          </div>
+          <BottomNav />
+          <InstallHint />
+        </Providers>
       </body>
     </html>
   );
