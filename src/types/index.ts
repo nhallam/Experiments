@@ -4,6 +4,13 @@ export type User = {
   createdAt: string;
 };
 
+export type Household = {
+  id: string;
+  name: string;
+  createdAt: string;
+  users: Pick<User, "id" | "name">[];
+};
+
 export type Category = {
   id: string;
   name: string;

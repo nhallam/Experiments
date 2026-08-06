@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createExpenseSchema, expenseFilterSchema } from "@/lib/validators";
-import { handleZod, jsonError, requireUserId } from "@/lib/api-helpers";
+import {
+  handleZod,
+  jsonError,
+  requireUserId,
+  resolveHouseholdId,
+} from "@/lib/api-helpers";
 
 export async function GET(req: Request) {
   try {
@@ -10,6 +15,8 @@ export async function GET(req: Request) {
     const filter = expenseFilterSchema.parse(Object.fromEntries(searchParams));
 
     const where: Record<string, unknown> = {};
+    const householdId = await resolveHouseholdId(req);
+    if (householdId) where.payer = { householdId };
     if (filter.categoryId) where.categoryId = filter.categoryId;
     if (filter.userId) {
       where.OR = [

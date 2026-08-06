@@ -37,9 +37,12 @@ export function periodRange(period: string): { start: Date; end: Date } {
   };
 }
 
-export async function getRentConfig(): Promise<RentConfig> {
-  const rows = await prisma.setting.findMany({
-    where: { key: { in: [KEY_TOTAL, KEY_SHARES, KEY_DEFAULT_PAYER] } },
+export async function getRentConfig(householdId: string): Promise<RentConfig> {
+  const rows = await prisma.householdSetting.findMany({
+    where: {
+      householdId,
+      key: { in: [KEY_TOTAL, KEY_SHARES, KEY_DEFAULT_PAYER] },
+    },
   });
   const byKey = Object.fromEntries(rows.map((r) => [r.key, r.value]));
   const totalCents = byKey[KEY_TOTAL] ? Number(byKey[KEY_TOTAL]) : 0;
@@ -49,11 +52,14 @@ export async function getRentConfig(): Promise<RentConfig> {
   return {
     totalCents: Number.isFinite(totalCents) ? totalCents : 0,
     shares,
-    defaultPayerId: byKey[KEY_DEFAULT_PAYER] ?? null,
+    defaultPayerId: byKey[KEY_DEFAULT_PAYER] || null,
   };
 }
 
-export async function saveRentConfig(config: RentConfig): Promise<void> {
+export async function saveRentConfig(
+  householdId: string,
+  config: RentConfig,
+): Promise<void> {
   const entries: [string, string][] = [
     [KEY_TOTAL, String(config.totalCents)],
     [KEY_SHARES, JSON.stringify(config.shares)],
@@ -61,9 +67,9 @@ export async function saveRentConfig(config: RentConfig): Promise<void> {
   ];
   await prisma.$transaction(
     entries.map(([key, value]) =>
-      prisma.setting.upsert({
-        where: { key },
-        create: { key, value },
+      prisma.householdSetting.upsert({
+        where: { householdId_key: { householdId, key } },
+        create: { householdId, key, value },
         update: { value },
       }),
     ),

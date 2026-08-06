@@ -3,13 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { api } from "@/lib/api-client";
-import type { User } from "@/types";
+import {
+  readCurrentUserId,
+  readCurrentHouseholdId,
+  writeCurrentHouseholdId,
+} from "@/lib/identity";
+import type { Household } from "@/types";
 import { IdentityPicker } from "./IdentityPicker";
 
+const OPEN_PATHS = ["/onboarding", "/households"];
+
 /**
- * Ensures onboarding happens before the rest of the app.
- * - If no users exist and we're not on /onboarding, redirect there.
- * - Otherwise, render children + identity picker modal as needed.
+ * Ensures a household is chosen before the rest of the app.
+ * - No households at all → /onboarding to create the first one.
+ * - No household chosen on this device → adopt the one the stored user
+ *   belongs to (upgrade path for phones from the single-household era),
+ *   otherwise → /households to pick.
  */
 export function AppBootstrap({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -18,13 +27,25 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     api
-      .get<User[]>("/api/users")
-      .then((users) => {
-        if (users.length === 0 && pathname !== "/onboarding") {
-          router.replace("/onboarding");
-        } else if (users.length > 0 && pathname === "/onboarding") {
-          router.replace("/");
+      .get<Household[]>("/api/households")
+      .then((households) => {
+        const open = OPEN_PATHS.includes(pathname);
+        if (households.length === 0) {
+          if (pathname !== "/onboarding") router.replace("/onboarding");
+          return;
         }
+        const stored = readCurrentHouseholdId();
+        if (stored && households.some((h) => h.id === stored)) return;
+
+        const uid = readCurrentUserId();
+        const mine = uid
+          ? households.find((h) => h.users.some((u) => u.id === uid))
+          : undefined;
+        if (mine) {
+          writeCurrentHouseholdId(mine.id);
+          return;
+        }
+        if (!open) router.replace("/households");
       })
       .finally(() => setChecked(true));
   }, [pathname, router]);
@@ -39,7 +60,7 @@ export function AppBootstrap({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {pathname !== "/onboarding" && <IdentityPicker />}
+      {!OPEN_PATHS.includes(pathname) && <IdentityPicker />}
       {children}
     </>
   );

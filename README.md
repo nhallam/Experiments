@@ -1,6 +1,6 @@
 # Housemate Expense Tracker
 
-A private Splitwise for a household of three. Record shared purchases, see who owes whom, and settle up.
+A private Splitwise for households of three. Record shared purchases, see who owes whom, and settle up. Multiple households can live side by side — each keeps its own housemates, expenses, rent config and recurring bills, so when the lineup changes you start a fresh household without losing the old one's history.
 
 ## Stack
 
@@ -21,6 +21,12 @@ pnpm dev                                # http://localhost:3000
 ```
 
 On first load, visit `/onboarding` to enter the three housemate names. After that, `/` shows balances and the feed.
+
+## Households
+
+`/households` lists every household and is where you pick yours (or create a new one via `/onboarding`, e.g. after housemates move out). The chosen household id is stored in `localStorage` under `currentHouseholdId` and sent on every API call as `x-household-id`; all queries are scoped to it. Requests without the header fall back to the oldest household, which is what pre-household clients expect.
+
+Databases created before the `Household` model existed are upgraded lazily: the first request after deploy folds existing users, recurring bills and the legacy rent settings into a household named after its members (see `ensureLegacyHousehold` in `src/lib/household.ts`).
 
 ## Identity
 

@@ -1,4 +1,4 @@
-import { readCurrentUserId } from "./identity";
+import { readCurrentUserId, readCurrentHouseholdId } from "./identity";
 
 type JsonBody = Record<string, unknown> | unknown[];
 
@@ -6,6 +6,8 @@ async function request<T>(method: string, path: string, body?: JsonBody): Promis
   const headers: Record<string, string> = { "content-type": "application/json" };
   const uid = readCurrentUserId();
   if (uid) headers["x-user-id"] = uid;
+  const hh = readCurrentHouseholdId();
+  if (hh) headers["x-household-id"] = hh;
 
   const res = await fetch(path, {
     method,

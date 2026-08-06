@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSettlementSchema } from "@/lib/validators";
-import { handleZod, jsonError } from "@/lib/api-helpers";
+import { handleZod, jsonError, resolveHouseholdId } from "@/lib/api-helpers";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const householdId = await resolveHouseholdId(req);
   const settlements = await prisma.settlement.findMany({
+    where: householdId ? { from: { householdId } } : undefined,
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     include: { from: true, to: true },
   });
