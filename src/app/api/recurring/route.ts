@@ -3,15 +3,20 @@ import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
 import { recurringExpenseSchema } from "@/lib/validators";
 import { serializeRecurring } from "@/lib/recurring";
-import { handleZod, jsonError } from "@/lib/api-helpers";
+import { handleZod, jsonError, resolveHouseholdId } from "@/lib/api-helpers";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const includeArchived = searchParams.get("includeArchived") === "1";
+    const householdId = await resolveHouseholdId(req);
+    if (!householdId) return NextResponse.json([]);
 
     const rows = await prisma.recurringExpense.findMany({
-      where: includeArchived ? undefined : { archived: false },
+      where: {
+        householdId,
+        ...(includeArchived ? {} : { archived: false }),
+      },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       include: { category: true },
     });
@@ -25,9 +30,14 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const input = recurringExpenseSchema.parse(body);
+    const householdId = await resolveHouseholdId(req);
+    if (!householdId) {
+      return jsonError("No household yet — create one first.", 400);
+    }
 
     const created = await prisma.recurringExpense.create({
       data: {
+        householdId,
         name: input.name,
         kind: input.kind,
         defaultCents: input.defaultCents,

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { jsonError } from "@/lib/api-helpers";
+import { jsonError, resolveHouseholdId } from "@/lib/api-helpers";
 
 function csvField(v: string | number | null | undefined): string {
   if (v === null || v === undefined) return "";
@@ -20,11 +20,16 @@ function ymd(d: Date): string {
   ).padStart(2, "0")}`;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const householdId = await resolveHouseholdId(req);
     const [users, expenses] = await Promise.all([
-      prisma.user.findMany({ orderBy: { name: "asc" } }),
+      prisma.user.findMany({
+        where: householdId ? { householdId } : undefined,
+        orderBy: { name: "asc" },
+      }),
       prisma.expense.findMany({
+        where: householdId ? { payer: { householdId } } : undefined,
         orderBy: [{ date: "desc" }, { createdAt: "desc" }],
         include: {
           payer: true,

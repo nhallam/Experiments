@@ -10,6 +10,16 @@ export const createUserSchema = z.object({
   name: nameSchema,
 });
 
+export const createHouseholdSchema = z
+  .object({
+    name: nameSchema.optional(),
+    names: z.array(nameSchema).length(3, "Enter all three names."),
+  })
+  .refine((d) => new Set(d.names).size === d.names.length, {
+    message: "Names must be unique.",
+    path: ["names"],
+  });
+
 export const updateUserSchema = z.object({
   name: nameSchema,
 });

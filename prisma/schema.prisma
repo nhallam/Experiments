@@ -8,15 +8,31 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+model Household {
+  id        String             @id @default(cuid())
+  name      String
+  createdAt DateTime           @default(now())
+  users     User[]
+  recurring RecurringExpense[]
+  settings  HouseholdSetting[]
+}
+
 model User {
   id                String             @id @default(cuid())
-  name              String             @unique
+  name              String
+  // Nullable so `prisma db push` upgrades a pre-household database in place;
+  // ensureLegacyHousehold() backfills it on the first request after deploy.
+  householdId       String?
+  household         Household?         @relation(fields: [householdId], references: [id])
   createdAt         DateTime           @default(now())
   paidExpenses      Expense[]          @relation("payer")
   shares            ExpenseShare[]
   paymentsFrom      Settlement[]       @relation("from")
   paymentsTo        Settlement[]       @relation("to")
   recurringDefaults RecurringExpense[] @relation("recurringDefaultPayer")
+
+  @@unique([householdId, name])
+  @@index([householdId])
 }
 
 model Category {
@@ -75,17 +91,33 @@ model Settlement {
   createdAt DateTime @default(now())
 }
 
+// Legacy global key-value store from the single-household era. Kept as the
+// source for the lazy migration; new per-household values live in
+// HouseholdSetting.
 model Setting {
   key   String @id
   value String
 }
 
+model HouseholdSetting {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  key         String
+  value       String
+
+  @@unique([householdId, key])
+}
+
 model RecurringExpense {
-  id             String    @id @default(cuid())
+  id             String     @id @default(cuid())
   name           String
-  kind           String    @default("fixed")
-  defaultCents   Int       @default(0)
-  currency       String    @default("USD")
+  kind           String     @default("fixed")
+  defaultCents   Int        @default(0)
+  currency       String     @default("USD")
+  // Nullable for the same lazy-migration reason as User.householdId.
+  householdId    String?
+  household      Household? @relation(fields: [householdId], references: [id])
   categoryId     String?
   category       Category? @relation(fields: [categoryId], references: [id])
   defaultPayerId String?
@@ -99,4 +131,5 @@ model RecurringExpense {
 
   @@index([archived])
   @@index([sortOrder])
+  @@index([householdId])
 }

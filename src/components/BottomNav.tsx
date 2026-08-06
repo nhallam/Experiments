@@ -29,7 +29,7 @@ function matches(href: string, pathname: string): boolean {
 
 export function BottomNav() {
   const pathname = usePathname();
-  if (pathname === "/onboarding") return null;
+  if (pathname === "/onboarding" || pathname === "/households") return null;
 
   // Pick the longest matching href so /expenses/new wins over /expenses.
   const activeHref = ITEMS.reduce(

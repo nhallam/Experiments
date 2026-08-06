@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { computeNetBalances, simplifyDebts } from "@/lib/balances";
+import { resolveHouseholdId } from "@/lib/api-helpers";
 
 function parseExcluded(req: Request): string[] {
   const { searchParams } = new URL(req.url);
@@ -10,16 +11,24 @@ function parseExcluded(req: Request): string[] {
 }
 
 export async function GET(req: Request) {
+  const householdId = await resolveHouseholdId(req);
+  if (!householdId) return NextResponse.json([]);
+
   const excluded = parseExcluded(req);
-  const expenseWhere = excluded.length
-    ? { categoryId: { notIn: excluded } }
-    : undefined;
-  const shareWhere = excluded.length
-    ? { expense: { categoryId: { notIn: excluded } } }
-    : undefined;
+  const expenseWhere = {
+    payer: { householdId },
+    ...(excluded.length && { categoryId: { notIn: excluded } }),
+  };
+  const shareWhere = {
+    user: { householdId },
+    ...(excluded.length && { expense: { categoryId: { notIn: excluded } } }),
+  };
 
   const [users, expenses, shares, settlements] = await Promise.all([
-    prisma.user.findMany({ select: { id: true, name: true } }),
+    prisma.user.findMany({
+      where: { householdId },
+      select: { id: true, name: true },
+    }),
     prisma.expense.findMany({
       where: expenseWhere,
       select: { payerId: true, amount: true },
@@ -31,6 +40,7 @@ export async function GET(req: Request) {
     excluded.length
       ? Promise.resolve([] as { fromId: string; toId: string; amount: number }[])
       : prisma.settlement.findMany({
+          where: { from: { householdId } },
           select: { fromId: true, toId: true, amount: true },
         }),
   ]);

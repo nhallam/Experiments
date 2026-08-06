@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { api } from "@/lib/api-client";
-import { useCurrentUserId } from "@/lib/identity";
+import { useCurrentUserId, useCurrentHouseholdId } from "@/lib/identity";
 import { toCents, formatMoney } from "@/lib/money";
 import { RENT_BP_TOTAL } from "@/lib/validators";
 import { RecurringEditor } from "@/components/RecurringEditor";
-import type { Category, User } from "@/types";
+import type { Category, Household, User } from "@/types";
 
 type RentConfig = {
   totalCents: number;
@@ -16,7 +17,10 @@ type RentConfig = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [currentId, setCurrentId] = useCurrentUserId();
+  const [householdId, setHouseholdId] = useCurrentHouseholdId();
+  const [households, setHouseholds] = useState<Household[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -37,9 +41,11 @@ export default function SettingsPage() {
       api.get<User[]>("/api/users"),
       api.get<Category[]>("/api/categories"),
       api.get<RentConfig>("/api/rent-config"),
-    ]).then(([u, c, r]) => {
+      api.get<Household[]>("/api/households"),
+    ]).then(([u, c, r, h]) => {
       setUsers(u);
       setCategories(c);
+      setHouseholds(h);
       setRent(r);
       setRentTotalInput(r.totalCents ? (r.totalCents / 100).toFixed(2) : "");
       const shareSum = Object.values(r.shares).reduce((s, n) => s + n, 0);
@@ -199,11 +205,27 @@ export default function SettingsPage() {
         <h2 className="mb-3 text-lg font-semibold">Your identity</h2>
         <p className="mb-3 text-sm text-neutral-600">
           You are currently signed in as{" "}
-          <strong>{users.find((u) => u.id === currentId)?.name ?? "unknown"}</strong>.
+          <strong>{users.find((u) => u.id === currentId)?.name ?? "unknown"}</strong>
+          {" "}in the{" "}
+          <strong>
+            {households.find((h) => h.id === householdId)?.name ?? "current"}
+          </strong>{" "}
+          household.
         </p>
-        <button className="btn-secondary" onClick={() => setCurrentId(null)}>
-          Switch user
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button className="btn-secondary" onClick={() => setCurrentId(null)}>
+            Switch user
+          </button>
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              setHouseholdId(null);
+              router.push("/households");
+            }}
+          >
+            Switch household
+          </button>
+        </div>
       </section>
 
       <section className="card p-5">
@@ -369,7 +391,11 @@ export default function SettingsPage() {
         </p>
         <a
           className="btn-secondary inline-block"
-          href="/api/expenses/export"
+          href={
+            householdId
+              ? `/api/expenses/export?hh=${encodeURIComponent(householdId)}`
+              : "/api/expenses/export"
+          }
           download
         >
           Download CSV
