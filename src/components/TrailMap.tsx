@@ -66,17 +66,20 @@ export function TrailMap({
         url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
         maxZoom={17}
       />
-      <Polyline positions={path} pathOptions={{ color: "#c2410c", weight: 4, opacity: 0.85 }} />
+      <Polyline
+        positions={path}
+        pathOptions={{ color: "#1a1815", weight: 3, opacity: 0.9, dashArray: "6 4" }}
+      />
       {pois.map((poi, i) => (
         <Fragment key={poi.id}>
           <CircleMarker
             center={poi.coord}
             radius={Math.max(6, proximityRadiusM / 80)}
             pathOptions={{
-              color: "#36502d",
+              color: "#1a1815",
               weight: 1,
-              fillColor: "#587e51",
-              fillOpacity: 0.15,
+              fillColor: "#1a1815",
+              fillOpacity: 0.08,
             }}
           />
           <Marker

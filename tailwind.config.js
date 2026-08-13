@@ -4,18 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        forest: {
-          50: "#f3f7f2",
-          100: "#e2ecdf",
-          500: "#587e51",
-          600: "#446339",
-          700: "#36502d",
-          800: "#2b4023",
-          900: "#1f2f1a",
+        bone: {
+          50: "#f6f2e8",
+          100: "#ece7dc",
+          200: "#dfd8c8",
+          300: "#c9c0ac",
+        },
+        ink: {
+          400: "#5a5348",
+          500: "#3a352d",
+          700: "#26221c",
+          900: "#1a1815",
         },
       },
       fontFamily: {
-        serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
+        mono: ['"JetBrains Mono"', "ui-monospace", "SFMono-Regular", "monospace"],
+        serif: ['"Instrument Serif"', "Georgia", "Cambria", "serif"],
+        display: ['"Anton"', "Impact", "sans-serif"],
+      },
+      letterSpacing: {
+        widest: "0.16em",
       },
     },
   },

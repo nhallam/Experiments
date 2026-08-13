@@ -96,9 +96,9 @@ export default function App() {
         {nearestNearby && !activePoi && dismissed.has(nearestNearby.id) && (
           <button
             onClick={() => setActivePoiId(nearestNearby.id)}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[900] bg-forest-700 hover:bg-forest-800 text-white text-sm px-4 py-2 rounded-full shadow-lg"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[900] bg-ink-900 hover:bg-ink-700 text-bone-100 text-[10px] uppercase tracking-widest px-4 py-2 border border-ink-900 shadow-lg"
           >
-            Reopen artwork ·{" "}
+            Reopen ·{" "}
             {trail.pois.find((p) => p.id === nearestNearby.id)?.name}
           </button>
         )}
