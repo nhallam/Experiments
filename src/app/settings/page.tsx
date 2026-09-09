@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [newHousemate, setNewHousemate] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newIcon, setNewIcon] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +81,36 @@ export default function SettingsPage() {
       refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
+    }
+  };
+
+  const addHousemate = async () => {
+    const name = newHousemate.trim();
+    if (!name) return;
+    setError(null);
+    try {
+      await api.post<User>("/api/users", { name });
+      setNewHousemate("");
+      refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to add housemate.");
+    }
+  };
+
+  const removeHousemate = async (u: User) => {
+    if (
+      !window.confirm(
+        `Remove ${u.name} from this household? Rent and bill splits will need re-entering.`,
+      )
+    )
+      return;
+    setError(null);
+    try {
+      await api.delete(`/api/users/${u.id}`);
+      if (currentId === u.id) setCurrentId(null);
+      refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to remove housemate.");
     }
   };
 
@@ -191,14 +222,41 @@ export default function SettingsPage() {
                       <p className="text-xs text-neutral-500">That&apos;s you</p>
                     )}
                   </div>
-                  <button className="btn-ghost" onClick={() => startEdit(u)}>
-                    Rename
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button className="btn-ghost" onClick={() => startEdit(u)}>
+                      Rename
+                    </button>
+                    <button
+                      className="btn-ghost text-red-600"
+                      onClick={() => removeHousemate(u)}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </>
               )}
             </li>
           ))}
         </ul>
+        <div className="mt-3 flex gap-2">
+          <input
+            className="input flex-1"
+            placeholder="New housemate name"
+            value={newHousemate}
+            onChange={(e) => setNewHousemate(e.target.value)}
+            autoCapitalize="words"
+            autoComplete="off"
+          />
+          <button className="btn-primary" onClick={addHousemate}>
+            Add
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">
+          A couple sharing money can be one housemate (e.g. &ldquo;Shy &amp;
+          Jas&rdquo;). Someone with logged expenses can&apos;t be removed —
+          rename them instead. After any change, re-check the rent and bill
+          splits below.
+        </p>
       </section>
 
       <section className="card p-5">

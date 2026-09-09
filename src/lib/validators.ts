@@ -10,10 +10,16 @@ export const createUserSchema = z.object({
   name: nameSchema,
 });
 
+export const MIN_HOUSEHOLD_SIZE = 2;
+export const MAX_HOUSEHOLD_SIZE = 6;
+
 export const createHouseholdSchema = z
   .object({
     name: nameSchema.optional(),
-    names: z.array(nameSchema).length(3, "Enter all three names."),
+    names: z
+      .array(nameSchema)
+      .min(MIN_HOUSEHOLD_SIZE, "Enter at least two names.")
+      .max(MAX_HOUSEHOLD_SIZE, `At most ${MAX_HOUSEHOLD_SIZE} housemates.`),
   })
   .refine((d) => new Set(d.names).size === d.names.length, {
     message: "Names must be unique.",

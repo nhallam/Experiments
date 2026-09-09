@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { prisma } from "@/lib/prisma";
-import { createUserSchema } from "@/lib/validators";
+import { createUserSchema, MAX_HOUSEHOLD_SIZE } from "@/lib/validators";
 import { handleZod, jsonError, resolveHouseholdId } from "@/lib/api-helpers";
 
 export async function GET(req: Request) {
@@ -23,8 +23,11 @@ export async function POST(req: Request) {
       return jsonError("No household yet — create one first.", 400);
     }
     const existing = await prisma.user.count({ where: { householdId } });
-    if (existing >= 3) {
-      return jsonError("This household is full (3 users max).", 400);
+    if (existing >= MAX_HOUSEHOLD_SIZE) {
+      return jsonError(
+        `This household is full (${MAX_HOUSEHOLD_SIZE} housemates max).`,
+        400,
+      );
     }
     const user = await prisma.user.create({
       data: { name: input.name, householdId },
