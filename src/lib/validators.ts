@@ -30,6 +30,10 @@ export const updateUserSchema = z.object({
   name: nameSchema,
 });
 
+export const mergeUserSchema = z.object({
+  intoId: z.string().min(1),
+});
+
 export const createCategorySchema = z.object({
   name: z.string().trim().min(1).max(30),
   icon: z.string().trim().max(8).optional(),

@@ -50,7 +50,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
     ]);
     if (expenses + shares + settlements > 0) {
       return jsonError(
-        `${user.name} is part of logged expenses or settlements and can't be removed. Rename them instead.`,
+        `${user.name} is part of logged expenses or settlements and can't be removed. Use Merge to fold them into another housemate, or rename them.`,
         409,
       );
     }
