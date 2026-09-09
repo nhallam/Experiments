@@ -25,6 +25,11 @@ export default function SettingsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [newHousemate, setNewHousemate] = useState("");
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [mergingId, setMergingId] = useState<string | null>(null);
+  const [mateError, setMateError] = useState<string | null>(null);
+  const [mateBusy, setMateBusy] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [newIcon, setNewIcon] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +85,49 @@ export default function SettingsPage() {
       refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
+    }
+  };
+
+  const addHousemate = async () => {
+    const name = newHousemate.trim();
+    if (!name) return;
+    setMateError(null);
+    try {
+      await api.post<User>("/api/users", { name });
+      setNewHousemate("");
+      refresh();
+    } catch (e) {
+      setMateError(e instanceof Error ? e.message : "Failed to add housemate.");
+    }
+  };
+
+  const removeHousemate = async (u: User) => {
+    setMateError(null);
+    setMateBusy(true);
+    try {
+      await api.delete(`/api/users/${u.id}`);
+      if (currentId === u.id) setCurrentId(null);
+      refresh();
+    } catch (e) {
+      setMateError(e instanceof Error ? e.message : "Failed to remove housemate.");
+    } finally {
+      setConfirmRemoveId(null);
+      setMateBusy(false);
+    }
+  };
+
+  const mergeHousemate = async (from: User, into: User) => {
+    setMateError(null);
+    setMateBusy(true);
+    try {
+      await api.post(`/api/users/${from.id}/merge`, { intoId: into.id });
+      if (currentId === from.id) setCurrentId(into.id);
+      refresh();
+    } catch (e) {
+      setMateError(e instanceof Error ? e.message : "Failed to merge housemates.");
+    } finally {
+      setMergingId(null);
+      setMateBusy(false);
     }
   };
 
@@ -183,6 +231,54 @@ export default function SettingsPage() {
                     Cancel
                   </button>
                 </>
+              ) : confirmRemoveId === u.id ? (
+                <>
+                  <p className="text-sm">
+                    Remove <strong>{u.name}</strong>?
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      className="btn-primary px-3 py-1"
+                      disabled={mateBusy}
+                      onClick={() => removeHousemate(u)}
+                    >
+                      {mateBusy ? "Removing…" : "Yes, remove"}
+                    </button>
+                    <button
+                      className="btn-ghost px-2 py-1"
+                      onClick={() => setConfirmRemoveId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
+              ) : mergingId === u.id ? (
+                <div className="w-full">
+                  <p className="mb-2 text-sm">
+                    Fold <strong>{u.name}</strong> and their expense history
+                    into:
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {users
+                      .filter((o) => o.id !== u.id)
+                      .map((o) => (
+                        <button
+                          key={o.id}
+                          className="chip"
+                          disabled={mateBusy}
+                          onClick={() => mergeHousemate(u, o)}
+                        >
+                          {mateBusy ? "…" : o.name}
+                        </button>
+                      ))}
+                    <button
+                      className="btn-ghost px-2 py-1"
+                      onClick={() => setMergingId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <>
                   <div>
@@ -191,14 +287,57 @@ export default function SettingsPage() {
                       <p className="text-xs text-neutral-500">That&apos;s you</p>
                     )}
                   </div>
-                  <button className="btn-ghost" onClick={() => startEdit(u)}>
-                    Rename
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button className="btn-ghost" onClick={() => startEdit(u)}>
+                      Rename
+                    </button>
+                    <button
+                      className="btn-ghost"
+                      onClick={() => {
+                        setMateError(null);
+                        setConfirmRemoveId(null);
+                        setMergingId(u.id);
+                      }}
+                    >
+                      Merge
+                    </button>
+                    <button
+                      className="btn-ghost text-red-600"
+                      onClick={() => {
+                        setMateError(null);
+                        setMergingId(null);
+                        setConfirmRemoveId(u.id);
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </>
               )}
             </li>
           ))}
         </ul>
+        {mateError && <p className="mt-2 text-sm text-red-600">{mateError}</p>}
+        <div className="mt-3 flex gap-2">
+          <input
+            className="input flex-1"
+            placeholder="New housemate name"
+            value={newHousemate}
+            onChange={(e) => setNewHousemate(e.target.value)}
+            autoCapitalize="words"
+            autoComplete="off"
+          />
+          <button className="btn-primary" onClick={addHousemate}>
+            Add
+          </button>
+        </div>
+        <p className="mt-2 text-xs text-neutral-500">
+          A couple sharing money can be one housemate (e.g. &ldquo;Shy &amp;
+          Jas&rdquo;): use <strong>Merge</strong> to fold one person and their
+          expense history into another. Remove only works for housemates with
+          no logged activity. After any change, re-check the rent and bill
+          splits below.
+        </p>
       </section>
 
       <section className="card p-5">

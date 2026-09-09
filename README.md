@@ -1,6 +1,6 @@
 # Housemate Expense Tracker
 
-A private Splitwise for households of three. Record shared purchases, see who owes whom, and settle up. Multiple households can live side by side — each keeps its own housemates, expenses, rent config and recurring bills, so when the lineup changes you start a fresh household without losing the old one's history.
+A private Splitwise for small households (2–6 housemates; a couple sharing money can be one entry). Record shared purchases, see who owes whom, and settle up. Multiple households can live side by side — each keeps its own housemates, expenses, rent config and recurring bills, so when the lineup changes you start a fresh household without losing the old one's history.
 
 ## Stack
 
@@ -20,7 +20,7 @@ pnpm db:seed                            # seed default categories
 pnpm dev                                # http://localhost:3000
 ```
 
-On first load, visit `/onboarding` to enter the three housemate names. After that, `/` shows balances and the feed.
+On first load, visit `/onboarding` to enter the housemate names (2–6, addable/removable later in Settings). After that, `/` shows balances and the feed.
 
 ## Households
 
